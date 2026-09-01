@@ -19,7 +19,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
-DEFAULT_ROOT = Path("/home/zhuokai/hand-teleop/datasets/ir_hard_classifier")
+DEFAULT_ROOT = Path("/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_hard_classifier")
 DEFAULT_TRIALS = (
     DEFAULT_ROOT / "trials/hard-classifier_s01_fixed-posture_foam_zk_rep01",
     DEFAULT_ROOT / "trials/oak-squeeze_s01_fixed-posture_foam_zk_rep02",

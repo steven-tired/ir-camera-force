@@ -94,7 +94,7 @@ RGB because that stream does not preserve a sufficiently bright white surround
 around the dots.
 
 It saves these files under
-`/home/zhuokai/hand-teleop/datasets/ir_foam_compression/preflight/`:
+`/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_foam_compression/preflight/`:
 
 - `thermal.png`: frozen thermal analysis areas.
 - `oak_rgb.png` and `oak_markers.png`: marker visibility and detection.
@@ -169,7 +169,7 @@ Analyze one completed trial with:
 ```bash
 env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
   analyze_ir_foam_compression.py \
-  --trial /home/zhuokai/hand-teleop/datasets/ir_foam_compression/trials/foam-compression_s01_foam_zk_rep01
+  --trial /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_foam_compression/trials/foam-compression_s01_foam_zk_rep01
 ```
 
 The pre-registered primary outcome is `foam_center_norm`: the median palette

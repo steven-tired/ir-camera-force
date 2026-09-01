@@ -58,7 +58,7 @@ def _trial_pairs(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", default="/home/zhuokai/hand-teleop/datasets/ir_grip_force_viability")
+    parser.add_argument("--root", default="/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability")
     parser.add_argument("--object", required=True, dest="object_name")
     parser.add_argument("--hardness", required=True, choices=["soft", "solid"])
     parser.add_argument("--rep", required=True, type=int)

@@ -1272,7 +1272,7 @@ env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
   record_ir_hand_pressure_trial.py --lepton-udp 8080 --surface skin \
   --contact hard_pinch --rep N \
   --bird /dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i-video-index0 \
-  --root /home/zhuokai/hand-teleop/datasets/lepton_hard_pinch
+  --root /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/lepton_hard_pinch
 # ...and --contact light_pinch, plus confusers (near-pinch/rubbing/warm-object)
 ```
 The first setup trial, `hand-pressure_skin_hard-pinch_sweep_rep01`, is retained as a rejected

@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 
 DEFAULT_TRIAL = Path(
-    "/home/zhuokai/hand-teleop/datasets/ir_hard_classifier/trials/"
+    "/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_hard_classifier/trials/"
     "oak-squeeze_s01_fixed-posture_foam_zk_rep02"
 )
 

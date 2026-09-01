@@ -20,7 +20,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
-DEFAULT_ROOT = Path("/home/zhuokai/hand-teleop/datasets/ir_foam_compression")
+DEFAULT_ROOT = Path("/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_foam_compression")
 
 
 @dataclass(frozen=True)

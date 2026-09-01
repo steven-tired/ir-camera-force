@@ -51,7 +51,7 @@ def test_parser_requires_frozen_regions_and_uses_geometry_targets_not_force_labe
     assert args.min_reference_span == 5.0
     assert args.recording_index == 1
     assert not hasattr(args, "force_newton")
-    assert args.palette.endswith("tools/flirone-v4l2/palettes/Iron2.raw")
+    assert args.palette.endswith("hardware/flirone-v4l2/palettes/Iron2.raw")
 
 
 def test_visible_marker_tracking_requires_rgb_recording_and_is_written_to_metadata(tmp_path):

@@ -98,9 +98,9 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--record-flir-visible", action="store_true")
     parser.add_argument(
         "--grip-targets",
-        default="/home/zhuokai/hand-teleop/datasets/ir_grip_force_viability/grip_targets.json",
+        default="/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/grip_targets.json",
     )
-    parser.add_argument("--root", default="/home/zhuokai/hand-teleop/datasets/ir_grip_force_viability")
+    parser.add_argument("--root", default="/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability")
     parser.add_argument("--port", default=ARM_PORT)
     parser.add_argument("--fps", type=float, default=10.0)
     parser.add_argument("--baseline-s", type=float, default=2.0)

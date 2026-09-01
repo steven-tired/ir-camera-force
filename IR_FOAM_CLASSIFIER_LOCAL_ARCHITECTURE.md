@@ -329,7 +329,7 @@ Primary command:
 cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
 env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
   analyze_ir_foam_compression.py \
-  --trial /home/zhuokai/hand-teleop/datasets/ir_foam_compression/trials/foam-compression_foam-20260715retry2_foam_zhuokai_rep08
+  --trial /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_foam_compression/trials/foam-compression_foam-20260715retry2_foam_zhuokai_rep08
 ~~~
 
 The analysis is restricted before examining results:

@@ -68,7 +68,7 @@ def main() -> None:
     parser.add_argument("--min-current-gap", type=float, default=10.0)
     parser.add_argument(
         "--out",
-        default="/home/zhuokai/hand-teleop/datasets/ir_grip_force_viability/grip_targets.json",
+        default="/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/grip_targets.json",
     )
     args = parser.parse_args()
 

@@ -100,7 +100,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--out-dir",
-        default="/home/zhuokai/hand-teleop/datasets/ir_grip_force_viability/setup_check",
+        default="/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/setup_check",
         help="Directory for captured verification frames",
     )
     args = parser.parse_args()

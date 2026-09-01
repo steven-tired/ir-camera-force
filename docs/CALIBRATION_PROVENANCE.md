@@ -58,3 +58,29 @@ migrated for preservation rather than active use. The Python tools under
 `calibration/realsense_lepton/tools/` are likewise copied as-is. Treat all of
 this as preserved-not-verified, distinct from the software/locked checks in
 `docs/SOURCE_MAP.md` that were actually run.
+
+## Local artifacts (Task 6)
+
+`docs/LOCAL_ARTIFACT_MIGRATION_MANIFEST.tsv` lists every tree, with source paths
+relative to the pre-split workspace root. ~19.5 GB total, all under the ignored
+`local/`.
+
+These were **moved, not copied** — same filesystem, so the rename is instant and
+costs no disk, and nothing is deleted. Copying would have duplicated 19.5 GB for
+no benefit.
+
+### Classification is by content, not by name
+
+`scratch_lepton/` is mostly PressureVision carton work despite the name: only
+`single_finger_surface_press_curve_01` and the extrinsic/fisheye/SB-detector
+planning documents are IR, and only those moved. `evidence/` (20 GB) is entirely
+PV, carton, and policy-deploy work and stayed where it is. `datasets/` split
+cleanly: every non-`hand_tracking_*` tree is IR or Lepton.
+
+### Path rewrites
+
+The migrated experiment programs had hard-coded `/home/zhuokai/hand-teleop/datasets/…`
+and `…/tools/flirone-v4l2/palettes/Iron2.raw` defaults, which the move would have
+broken. They now point at this repo's `local/datasets/` and `hardware/flirone-v4l2/`.
+They are still absolute paths — fine while this repo sits inside the old
+workspace, and something to revisit if it ever moves.

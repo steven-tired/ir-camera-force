@@ -25,7 +25,7 @@ from ir_force.classifier.ir_dataset import (
 )
 
 
-DEFAULT_ROOT = "/home/zhuokai/hand-teleop/datasets/ir_hand_pressure_hysteresis"
+DEFAULT_ROOT = "/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_hand_pressure_hysteresis"
 DEFAULT_LEVELS = "zero,light,medium,hard,medium,light,zero"
 LEVEL_VALUES = {
     "zero": 0.0,

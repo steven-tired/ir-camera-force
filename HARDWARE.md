@@ -71,7 +71,7 @@ Saved to `~/.cache/huggingface/lerobot/calibration/robots/so_follower/so101_foll
 
 - Experiment plan: `docs/superpowers/plans/2026-07-06-ir-grip-force-viability-experiment.md`
 - Operator runbook: `IR_GRIP_FORCE_EXPERIMENT.md`
-- Dataset root: `/home/zhuokai/hand-teleop/datasets/ir_grip_force_viability`
+- Dataset root: `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability`
 - Historical device enumeration above listed the workspace camera as
   `/dev/video2`, but do not use `/dev/video2` for this experiment.
 - Before the first IR run, list the stable symlinks with:
@@ -105,7 +105,7 @@ Saved to `~/.cache/huggingface/lerobot/calibration/robots/so_follower/so101_foll
 - If palette reconstruction is available during feature extraction, use:
   ```bash
   env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python extract_ir_grip_features.py \
-    --root /home/zhuokai/hand-teleop/datasets/ir_grip_force_viability \
+    --root /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability \
     --baseline-frames 20 \
     --palette /tmp/flirone-v4l2/palettes/Iron2.raw \
     --invert-palette

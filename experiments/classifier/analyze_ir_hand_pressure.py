@@ -19,7 +19,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
-DEFAULT_ROOT = Path("/home/zhuokai/hand-teleop/datasets/ir_hand_pressure_viability")
+DEFAULT_ROOT = Path("/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_hand_pressure_viability")
 DEFAULT_MAIN_REPS = (2, 3, 4, 5)
 DEFAULT_TOUCH_CROP = (330, 85, 230, 315)
 DEFAULT_SHAPE_CROP = (355, 120, 165, 245)
