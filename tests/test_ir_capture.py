@@ -28,7 +28,7 @@ from ir_force.ir_capture import (
 )
 from ir_force.ir_dataset import HandPressureTrialSpec, create_hand_pressure_trial_paths
 from ir_force.ir_dataset import TrialSpec, create_trial_paths
-from ir_force.ir_robot import TelemetrySnapshot
+from lerobot_teleoperator_so101_webcam.gripper_hardware import TelemetrySnapshot
 
 
 class FakeFrameSource:

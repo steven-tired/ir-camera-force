@@ -43,7 +43,7 @@ from webcam_input.wrist_estimator import WebcamWristEstimator
 from lerobot_teleoperator_so101_webcam.config_so101_webcam_ee import SO101WebcamEEConfig
 from lerobot_teleoperator_so101_webcam.ee_control import gripper_pos_from_pinch
 from lerobot_teleoperator_so101_webcam.ee_controller import WebcamEEController
-from ir_force.hand_startup_gate import (
+from lerobot_teleoperator_so101_webcam.hand_startup_gate import (
     HAND_STARTUP_DWELL_S,
     MAX_WRIST_ROLL_RANGE_DEG,
     ContinuousHandStartupGate,
@@ -61,7 +61,7 @@ from ir_force.ir_pressure import (
     HandPressureEstimator,
     lepton_pressure_config,
 )
-from ir_force.ir_robot import (
+from lerobot_teleoperator_so101_webcam.gripper_hardware import (
     GripperClosureLimits,
     GripperTelemetrySampler,
 )

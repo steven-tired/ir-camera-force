@@ -22,7 +22,7 @@ from __future__ import annotations
 from lerobot_teleoperator_so101_webcam.grip.contract import GripInput
 from lerobot_teleoperator_so101_webcam.grip.mediapipe import RELEASE_POS
 
-from ir_force.ir_pressure_proposal import (
+from lerobot_teleoperator_so101_webcam.grip.proposal import (
     PressureProposalDecision,
     PressureProposalStateMachine,
 )

@@ -69,7 +69,7 @@ def test_entry_point_has_no_robot_or_controller_imports():
         elif isinstance(node, ast.ImportFrom):
             imported.append(node.module or "")
 
-    forbidden = ("ir_robot", "record_so101", "gripper", "controller", "deploy")
+    forbidden = ("gripper_hardware", "record_so101", "gripper", "controller", "deploy")
     assert not [
         module
         for module in imported

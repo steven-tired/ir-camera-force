@@ -22,7 +22,7 @@ from ir_force.ir_dataset import (
     ensure_fresh_trial,
     write_metadata,
 )
-from ir_force.ir_robot import read_gripper_telemetry, slow_close_waypoints
+from lerobot_teleoperator_so101_webcam.gripper_hardware import read_gripper_telemetry, slow_close_waypoints
 
 
 ARM_PORT = "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B14110850-if00"

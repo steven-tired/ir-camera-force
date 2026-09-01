@@ -25,8 +25,16 @@ ROBOT_FREE_MODULES = [
     "ir_force.ir_hand_calibration",
     "ir_force.ir_hand_roi",
     "ir_force.ir_pressure",
-    "ir_force.ir_pressure_proposal",
     "ir_force.ir_shadow_telemetry",
+    # The public grip package, reached with ROBOT_FREE_IMPORT set so its
+    # __init__ skips the plugin classes. Importing `grip.proposal` without that
+    # guard drags in lerobot.motors and a serial stack -- exactly what the
+    # `prohibited` list below exists to catch.
+    "lerobot_teleoperator_so101_webcam",
+    "lerobot_teleoperator_so101_webcam.grip",
+    "lerobot_teleoperator_so101_webcam.grip.contract",
+    "lerobot_teleoperator_so101_webcam.grip.mediapipe",
+    "lerobot_teleoperator_so101_webcam.grip.proposal",
 ]
 
 
@@ -96,7 +104,7 @@ _ALLOWED_FROM_IMPORTS = {
         "load_projection_calibration",
         "validate_projection_calibration",
     },
-    "ir_force.ir_pressure_proposal": {
+    "lerobot_teleoperator_so101_webcam.grip.proposal": {
         "GRIP_CLOSE_ALPHA",
         "GRIP_OPEN_ALPHA",
         "GRIP_OVERDRIVE",
@@ -481,6 +489,7 @@ def test_source_checker_allows_explicit_sys_import_and_stderr():
 
 PUBLIC_REPO = PROJECT_ROOT.parent / "mediapipe-so101"
 PUBLIC_WEBCAM_INPUT_SRC = PUBLIC_REPO / "packages" / "webcam_input" / "src"
+PUBLIC_SO101_SRC = PUBLIC_REPO / "packages" / "so101_teleop" / "src"
 
 
 def _public_package_paths():
@@ -493,7 +502,7 @@ def _public_package_paths():
     refuses to load. So point the child at the public checkout explicitly:
     PYTHONPATH precedes site-packages, so it wins over the stale .pth entry.
     """
-    return [str(PUBLIC_WEBCAM_INPUT_SRC)] if PUBLIC_WEBCAM_INPUT_SRC.is_dir() else []
+    return [str(path) for path in (PUBLIC_WEBCAM_INPUT_SRC, PUBLIC_SO101_SRC) if path.is_dir()]
 
 
 def _fresh_python(code):
@@ -525,7 +534,7 @@ import webcam_input
 prohibited = sorted(
     name for name in sys.modules
     if name == "serial"
-    or name == "ir_force.ir_robot"
+    or name == "lerobot_teleoperator_so101_webcam.gripper_hardware"
     or name.startswith("serial.")
     or name.startswith("lerobot.teleoperators")
     or name.startswith("lerobot.robots")
@@ -2764,7 +2773,7 @@ exit_code = ir_pressure_soak.main([
 prohibited = sorted(
     name for name in sys.modules
     if name == 'serial'
-    or name == 'ir_force.ir_robot'
+    or name == 'lerobot_teleoperator_so101_webcam.gripper_hardware'
     or name.startswith('serial.')
     or name.startswith('lerobot.teleoperators')
     or name.startswith('lerobot.robots')

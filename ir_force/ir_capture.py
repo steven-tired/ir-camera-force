@@ -13,7 +13,7 @@ import cv2
 import numpy as np
 
 from ir_force.ir_dataset import TrialPaths, append_telemetry_row
-from ir_force.ir_robot import TelemetrySnapshot
+from lerobot_teleoperator_so101_webcam.gripper_hardware import TelemetrySnapshot
 
 
 TELEMETRY_FIELDS = (

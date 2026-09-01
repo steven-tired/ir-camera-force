@@ -9,7 +9,7 @@ from pathlib import Path
 from lerobot.robots.so_follower.config_so_follower import SO101FollowerConfig
 from lerobot.robots.so_follower.so_follower import SOFollower
 
-from ir_force.classifier.ir_robot import (
+from lerobot_teleoperator_so101_webcam.gripper_hardware import (
     TelemetrySnapshot,
     choose_three_grip_targets,
     read_gripper_telemetry,

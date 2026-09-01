@@ -173,6 +173,6 @@ def test_capture_entry_imports_no_robot_or_control_modules():
             "deploy",
             "record_so101",
             "teleop_viz",
-            "ir_robot",
+            "gripper_hardware",
         )
     )

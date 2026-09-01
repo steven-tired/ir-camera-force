@@ -19,7 +19,7 @@ from lerobot_teleoperator_so101_webcam.grip.mediapipe import RELEASE_POS
 
 from ir_force.gripper_adapter import IRShadowGripperController
 from ir_force.ir_pressure import PressureReading
-from ir_force.ir_pressure_proposal import PressureProposalDecision
+from lerobot_teleoperator_so101_webcam.grip.proposal import PressureProposalDecision
 
 
 def grip(**overrides) -> GripInput:

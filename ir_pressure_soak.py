@@ -57,7 +57,7 @@ try:
         inactive_pressure,
         timing_limit_exceeded,
     )
-    from ir_force.ir_pressure_proposal import (
+    from lerobot_teleoperator_so101_webcam.grip.proposal import (
         GRIP_CLOSE_ALPHA,
         GRIP_OPEN_ALPHA,
         GRIP_OVERDRIVE,

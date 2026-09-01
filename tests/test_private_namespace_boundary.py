@@ -28,6 +28,12 @@ PUBLIC_MODULES = [
     "so101_webcam_ee.py",
     "paths.py",
     "servo_pid.py",
+    # Moved out in the PV/force-control migration: none of these was
+    # sensor-specific, they were just written where the IR experiments were.
+    "gripper_hardware.py",
+    "hand_startup_gate.py",
+    "ir_robot.py",
+    "ir_pressure_proposal.py",
 ]
 
 
