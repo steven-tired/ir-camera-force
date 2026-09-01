@@ -1,0 +1,5 @@
+src/flirone.o
+flirone
+__pycache__/
+.pytest_cache/
+validation_capture/*/

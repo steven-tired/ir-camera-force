@@ -50,3 +50,47 @@ decision has not been made and is not made by this migration.
 | `docs/CLAIMS_AND_GATES.md` | `wt` IR_GRIP_FORCE_EXPERIMENT.md, IR_HAND_PINCH_PREREGISTRATION.md, HARDWARE.md | rewritten |
 
 _Module-level rows are appended as each group migrates._
+
+## Hardware (Task 4)
+
+Source paths are relative to the pre-split `hand-teleop` workspace root. Per-tree
+provenance — upstream URL, exact commit, and the uncommitted work carried across —
+is in each tree's own `UPSTREAM.md`.
+
+| Destination | Source | Disposition |
+| --- | --- | --- |
+| `hardware/flirone-v4l2/` | `tools/flirone-v4l2` @ `b07e3a1` + dirty tree | copied, no `.git`, no binaries |
+| `hardware/flirone-v4l2-radiometric-audit/` | `tools/flirone-v4l2-radiometric-audit` @ `e0b603c` (branch `codex/flir-radiometric-feasibility`) | copied, no `.git`, no `validation_capture/` |
+| `hardware/lepton/` | `lepton-module-ir-hand-pinch-phase1` @ `d5b6879` (branch `ir-hand-pinch-phase1`) + dirty tree | copied, no `.git`, no build output |
+| `local/evidence/flir_radiometric_validation_capture/` | `tools/flirone-v4l2-radiometric-audit/validation_capture/` | moved to ignored evidence (5.7 MB of captured frames) |
+
+`lepton-module` (master) is **not** separately migrated: it sits at the same
+commit `d5b6879` as the worktree above, so the worktree copy is a strict superset.
+
+### Recorded conflict: two divergent `src/flirone.c`
+
+The plan required that the radiometric-audit content not silently overwrite the
+working decoder patch. It would have:
+
+| Tree | `src/flirone.c` | Contains |
+| --- | --- | --- |
+| `hardware/flirone-v4l2/` | 884 lines | Gen 2 `decode_g2_thermal()` patch, `/dev/video20`+`/dev/video21` remap — **uncommitted upstream, exists in no repository** |
+| `hardware/flirone-v4l2-radiometric-audit/` | 1198 lines | the same decoder patch **plus** raw-frame capture instrumentation and frame hashing |
+
+They are divergent variants of the same locally-patched file. Merging into one
+subtree would have meant discarding one — and the discarded side would be the
+patch with no other home. Both are kept whole as sibling trees.
+
+### Hardware trees carry their own test suites
+
+`testpaths = ["tests"]` means the repo suite does not reach them. They are run
+directly, and were run at migration:
+
+| Tree | Check | Result |
+| --- | --- | --- |
+| `hardware/flirone-v4l2/` | `make` | compiles clean |
+| `hardware/flirone-v4l2-radiometric-audit/` | `make`; `pytest tests` | compiles clean; 33 passed |
+| `hardware/lepton/software/` | `cmake` + `make` + `ctest` | configures, builds (incl. the phase-1 `test_lepton_vospi` binary), 1/1 passed |
+
+These are **software/locked** checks. No camera was attached, and the Lepton
+itself has been dead since 2026-07-17 — none of this is live-sensor evidence.

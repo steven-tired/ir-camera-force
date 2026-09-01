@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "assessment_date": "2026-07-16",
+  "branch": "codex/flir-radiometric-feasibility",
+  "final_decision": "FIXED-RANGE NON-RADIOMETRIC OUTPUT ONLY",
+  "decision_status": "live_raw_format_and_static_stability_validated",
+  "raw_count_export": {
+    "implemented": true,
+    "hardware_validated": true,
+    "format": "per-frame uint16 little-endian with JSON metadata",
+    "source_payload_layouts": [
+      "FLIR ONE G2: 160x120 little-endian decoded samples",
+      "FLIR ONE Gen3/Lepton2: 80x60 little-endian decoded samples"
+    ],
+    "validated_capture": {
+      "directory": "validation_capture/little_endian_corrected",
+      "frame_count": 180,
+      "deduplicated_normal_frame_count": 129,
+      "dimensions": [80, 60],
+      "raw_median_range": [3495, 3517],
+      "raw_median_population_stdev": 3.830100689772064,
+      "raw_median_drift_counts_per_s": -0.2667951290174654,
+      "repeated_frame_fraction": 0.2833333333333333,
+      "ffc_frames_observed": 0
+    },
+    "rejected_initial_decode": {
+      "directory": "validation_capture/raw",
+      "reason": "The 80x60 payload was initially read as big-endian. Byte-swapped values were stable, proving the source-word order was reversed."
+    }
+  },
+  "fixed_range_display_mapping": {
+    "implemented": true,
+    "hardware_validated": false,
+    "mapping_units": "raw_counts",
+    "temperature_units": false
+  },
+  "raw_count_repeatability_protocol": {
+    "implemented": true,
+    "hardware_validated": false,
+    "scope": [
+      "FFC raw-count recovery",
+      "bridge-restart raw-count offsets",
+      "hot-hand dynamic-scene target/control stability",
+      "fixed-range RGB visualization"
+    ],
+    "result": "not yet measured"
+  },
+  "factory_or_per_device_radiometry": {
+    "available": false,
+    "validated": false,
+    "reason": "The audited source has only generic FLIR ONE JPEG EXIF Planck constants and no verified per-device calibration extraction."
+  },
+  "current_v4l2_output": {
+    "device": "/dev/video21",
+    "format": "160x128 RGB3",
+    "radiometric": false,
+    "mapping": "dynamic per-frame min/max before palette conversion"
+  },
+  "required_before_any_temperature_claim": [
+    "Reference-temperature ordering and repeatability test",
+    "FFC and restart stability check",
+    "Live dynamic-scene validation of the fixed raw-count display range",
+    "Per-device calibration source or an independently validated empirical calibration with emissivity controls"
+  ]
+}
