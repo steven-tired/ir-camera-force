@@ -1,0 +1,11 @@
+.vscode/**
+.venv/**
+.pyc/**
+**/__pycache__/
+**/build/
+**/image_set_*
+**/color_images
+**/thermal_images
+**/tmp
+**/test
+calibration/compute_out/

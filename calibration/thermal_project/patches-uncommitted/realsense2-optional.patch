@@ -1,0 +1,30 @@
+diff --git a/stream/CMakeLists.txt b/stream/CMakeLists.txt
+index 087e26d..6e85171 100644
+--- a/stream/CMakeLists.txt
++++ b/stream/CMakeLists.txt
+@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 14)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+ # Find Packages to run the programs
+-find_package(realsense2 REQUIRED)
+ find_package(OpenCV REQUIRED)
++find_package(realsense2 QUIET)
+ 
+ # Include directories for OpenCV and the current directory
+ include_directories(${OpenCV_INCLUDE_DIRS})
+@@ -19,8 +19,13 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/images)
+ 
+ # Define the executable
+ add_executable(lepton lepton.cpp Palettes.cpp)
+-add_executable(depth_saver depthimage.cpp Palettes.cpp)
+ 
+ # Link the libraries
+ target_link_libraries(lepton ${OpenCV_LIBS})
+-target_link_libraries(depth_saver ${realsense2_LIBRARY} ${OpenCV_LIBS})
++
++if(realsense2_FOUND)
++    add_executable(depth_saver depthimage.cpp Palettes.cpp)
++    target_link_libraries(depth_saver ${realsense2_LIBRARY} ${OpenCV_LIBS})
++else()
++    message(STATUS "realsense2 not found; building thermal-only lepton viewer")
++endif()

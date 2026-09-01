@@ -1,0 +1,13 @@
+repositories:
+  LeptonModule:
+    type: git
+    url: git@github.com:AnujN9/LeptonModule.git
+    version: master
+  ThermalProject:
+    type: git
+    url: git@github.com:AnujN9/ThermalProject.git
+    version: main
+  ThermalProject_ROS:
+    type: git
+    url: git@github.com:AnujN9/ThermalProject_ROS.git
+    version: main
