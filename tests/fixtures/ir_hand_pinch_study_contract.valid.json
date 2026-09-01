@@ -1,0 +1,60 @@
+{
+  "schema_version": "ir-hand-pinch-study-contract/v1",
+  "participant_pseudonym": "pilot-001",
+  "session_indices": [1, 2, 3, 4, 5, 6],
+  "distinct_calendar_days": true,
+  "preregistration_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "schedule_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "labels": ["loose", "tight"],
+  "completed_trials_per_class": 15,
+  "technical_abort_reserves_per_class": 5,
+  "technical_abort_reason_codes": [
+    "pretrial_ffc_failed",
+    "acquisition_process_exit",
+    "realsense_disconnect",
+    "lepton_stream_disconnect",
+    "required_file_write_failed",
+    "trial_timing_controller_failed"
+  ],
+  "feature_contract": {
+    "RS1": {
+      "definition": "thumb-index RGB pixel distance divided by landmark 5-to-17 palm scale",
+      "unit": "ratio",
+      "aggregate": "median"
+    },
+    "RS2": {
+      "definition": "absolute aligned thumb-index Z difference",
+      "unit": "metre",
+      "aggregate": "median"
+    },
+    "delta_T": {
+      "definition": "pinch-window TLinear temperature minus adjacent hand-skin baseline",
+      "unit": "kelvin",
+      "aggregate": "median"
+    }
+  },
+  "roi_contract_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "code_artifact_sha256": {
+    "preregistration": "3333333333333333333333333333333333333333333333333333333333333333",
+    "schedule": "4444444444444444444444444444444444444444444444444444444444444444",
+    "recorder_config": "5555555555555555555555555555555555555555555555555555555555555555"
+  },
+  "software_versions": {
+    "python": "3.12.13",
+    "numpy": "2.4.2",
+    "scikit_learn": "1.9.0",
+    "git_commit": "0000000000000000000000000000000000000000"
+  },
+  "acquisition": {
+    "realsense_serial": "233522078685",
+    "realsense_color_profile": "640x480 BGR8 @ 30 Hz",
+    "realsense_depth_profile": "640x480 Z16 @ 30 Hz",
+    "expected_aligned_realsense_fps": 30,
+    "minimum_realsense_frames": 30,
+    "realsense_minimum_yield_fraction": 0.5,
+    "analysis_window_seconds": 2.0,
+    "minimum_thermal_frames": 9,
+    "manual_ffc": true,
+    "footer_telemetry": true
+  }
+}

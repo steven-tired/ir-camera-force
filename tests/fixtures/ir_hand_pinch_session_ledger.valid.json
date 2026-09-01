@@ -1,0 +1,54 @@
+{
+  "schema_version": "ir-hand-pinch-session-ledger/v1",
+  "run_id": "session-1-attempt-1",
+  "session_index": 1,
+  "session_attempt": 1,
+  "prior_failed_run_id": null,
+  "session_date": "2026-07-22",
+  "study_contract_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "schedule_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "realsense_profile_verification": {
+    "serial": "233522078685",
+    "color_profile": "640x480 BGR8 @ 30 Hz",
+    "depth_profile": "640x480 Z16 @ 30 Hz",
+    "analysis_window_seconds": 2.0,
+    "complete_aligned_frames": 30,
+    "passed": true
+  },
+  "trials": [
+    {
+      "scheduled_slot": 1,
+      "attempt_index": 1,
+      "label": "loose",
+      "outcome": "completed",
+      "abort_reason": null,
+      "start_monotonic_ns": 1000000000,
+      "end_monotonic_ns": 6000000000,
+      "ffc": {
+        "pretrial_complete": true,
+        "since_last_ffc_reset": true,
+        "analysis_window_active": false
+      },
+      "realsense_validity": {
+        "valid": true,
+        "reason": null
+      },
+      "thermal_validity": {
+        "valid": false,
+        "reason": "insufficient_frames"
+      },
+      "artifacts": {
+        "rgb": {
+          "path": "raw/session-1/trial-1-rgb.npy",
+          "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "depth": {
+          "path": "raw/session-1/trial-1-depth.npy",
+          "sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+        },
+        "thermal": null
+      }
+    }
+  ],
+  "terminal_seal_sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+}

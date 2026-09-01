@@ -1,0 +1,272 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ir-hand-pinch-session-ledger.schema.json",
+  "title": "IR hand pinch append-only session ledger content",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "session_index",
+    "session_attempt",
+    "prior_failed_run_id",
+    "session_date",
+    "study_contract_sha256",
+    "schedule_sha256",
+    "realsense_profile_verification",
+    "trials",
+    "terminal_seal_sha256"
+  ],
+  "properties": {
+    "schema_version": {"const": "ir-hand-pinch-session-ledger/v1"},
+    "run_id": {"type": "string", "minLength": 1},
+    "session_index": {"type": "integer", "minimum": 1, "maximum": 6},
+    "session_attempt": {"type": "integer", "enum": [1, 2]},
+    "prior_failed_run_id": {"type": ["string", "null"]},
+    "session_date": {"type": "string", "format": "date"},
+    "study_contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "schedule_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "realsense_profile_verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "serial",
+        "color_profile",
+        "depth_profile",
+        "analysis_window_seconds",
+        "complete_aligned_frames",
+        "passed"
+      ],
+      "properties": {
+        "serial": {"const": "233522078685"},
+        "color_profile": {"const": "640x480 BGR8 @ 30 Hz"},
+        "depth_profile": {"const": "640x480 Z16 @ 30 Hz"},
+        "analysis_window_seconds": {"const": 2.0},
+        "complete_aligned_frames": {"type": "integer", "minimum": 30},
+        "passed": {"const": true}
+      }
+    },
+    "trials": {
+      "type": "array",
+      "uniqueItems": true,
+      "allOf": [
+        {
+          "contains": {
+            "properties": {
+              "label": {"const": "loose"},
+              "outcome": {"const": "technical_abort"}
+            },
+            "required": ["label", "outcome"]
+          },
+          "minContains": 0,
+          "maxContains": 5
+        },
+        {
+          "contains": {
+            "properties": {
+              "label": {"const": "tight"},
+              "outcome": {"const": "technical_abort"}
+            },
+            "required": ["label", "outcome"]
+          },
+          "minContains": 0,
+          "maxContains": 5
+        }
+      ],
+      "items": {
+        "$ref": "#/$defs/trial",
+        "required": [
+          "scheduled_slot",
+          "attempt_index",
+          "label",
+          "outcome",
+          "abort_reason",
+          "start_monotonic_ns",
+          "end_monotonic_ns",
+          "ffc",
+          "realsense_validity",
+          "thermal_validity",
+          "artifacts"
+        ]
+      }
+    },
+    "terminal_seal_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"session_attempt": {"const": 1}}},
+      "then": {"properties": {"prior_failed_run_id": {"const": null}}}
+    },
+    {
+      "if": {"properties": {"session_attempt": {"const": 2}}},
+      "then": {
+        "properties": {
+          "prior_failed_run_id": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["valid", "reason"],
+      "properties": {
+        "valid": {"type": "boolean"},
+        "reason": {"type": ["string", "null"]}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "nullable_artifact": {
+      "oneOf": [
+        {"$ref": "#/$defs/artifact"},
+        {"type": "null"}
+      ]
+    },
+    "trial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scheduled_slot",
+        "attempt_index",
+        "label",
+        "outcome",
+        "abort_reason",
+        "start_monotonic_ns",
+        "end_monotonic_ns",
+        "ffc",
+        "realsense_validity",
+        "thermal_validity",
+        "artifacts"
+      ],
+      "properties": {
+        "scheduled_slot": {"type": "integer", "minimum": 1, "maximum": 30},
+        "attempt_index": {"type": "integer", "minimum": 1, "maximum": 6},
+        "label": {"type": "string", "enum": ["loose", "tight"]},
+        "outcome": {"type": "string", "enum": ["completed", "technical_abort"]},
+        "abort_reason": {"type": ["string", "null"]},
+        "start_monotonic_ns": {"type": "integer", "minimum": 0},
+        "end_monotonic_ns": {"type": "integer", "minimum": 0},
+        "ffc": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["pretrial_complete", "since_last_ffc_reset", "analysis_window_active"],
+          "properties": {
+            "pretrial_complete": {"type": "boolean"},
+            "since_last_ffc_reset": {"type": "boolean"},
+            "analysis_window_active": {"type": "boolean"}
+          }
+        },
+        "realsense_validity": {"$ref": "#/$defs/validity"},
+        "thermal_validity": {"$ref": "#/$defs/validity"},
+        "artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["rgb", "depth", "thermal"],
+          "properties": {
+            "rgb": {"$ref": "#/$defs/nullable_artifact"},
+            "depth": {"$ref": "#/$defs/nullable_artifact"},
+            "thermal": {"$ref": "#/$defs/nullable_artifact"}
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"outcome": {"const": "completed"}}},
+          "then": {
+            "properties": {
+              "abort_reason": {"const": null},
+              "ffc": {
+                "properties": {
+                  "pretrial_complete": {"const": true},
+                  "since_last_ffc_reset": {"const": true}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"outcome": {"const": "technical_abort"}}},
+          "then": {
+            "properties": {
+              "abort_reason": {
+                "enum": [
+                  "pretrial_ffc_failed",
+                  "acquisition_process_exit",
+                  "realsense_disconnect",
+                  "lepton_stream_disconnect",
+                  "required_file_write_failed",
+                  "trial_timing_controller_failed"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {"const": "completed"},
+              "ffc": {
+                "properties": {"analysis_window_active": {"const": true}}
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "thermal_validity": {
+                "properties": {"valid": {"const": false}}
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {"const": "completed"},
+              "realsense_validity": {
+                "properties": {"valid": {"const": true}}
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "artifacts": {
+                "properties": {
+                  "rgb": {"$ref": "#/$defs/artifact"},
+                  "depth": {"$ref": "#/$defs/artifact"}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {"const": "completed"},
+              "thermal_validity": {
+                "properties": {"valid": {"const": true}}
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "artifacts": {
+                "properties": {
+                  "thermal": {"$ref": "#/$defs/artifact"}
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

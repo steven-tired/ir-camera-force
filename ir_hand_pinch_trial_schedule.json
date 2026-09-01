@@ -1,0 +1,43 @@
+{
+  "schema_version": "ir-hand-pinch-trial-schedule/v1",
+  "provenance_seeds": {
+    "analysis_permutation_seed": 164
+  },
+  "runtime_regeneration_permitted": false,
+  "reserve_tokens_per_class": {
+    "L": 5,
+    "T": 5
+  },
+  "sessions": [
+    {
+      "session_index": 1,
+      "primary": "LLTLLTLTTTLTLTTTLTLLTLLLTTLLTT",
+      "sha256": "85b9d32d60dedc71d14becd3db2f13db2d2bc70f9884079ad083a8cbab3ebf57"
+    },
+    {
+      "session_index": 2,
+      "primary": "LTTLTTLTLTTLTLLTLTTTLLLTLTLLLT",
+      "sha256": "69fb74a10652f36e3d971d5c9d4ec3d59dc81d5513ff4f700a7f52d2f7a9f316"
+    },
+    {
+      "session_index": 3,
+      "primary": "LLLLLLTTTLTTLTTTLLLTTTTTLTLLLT",
+      "sha256": "4b08c9e4a0732658f914fea1f8e0dfeca43a0d70b756fe0a49b846f29751c0b4"
+    },
+    {
+      "session_index": 4,
+      "primary": "LLLTTTLLTLLLLLTTTLTTLTTLTTTTLL",
+      "sha256": "3f70ed366db25b32a216413551220f06d98bde77432d4c2a21b247fbaeb4eade"
+    },
+    {
+      "session_index": 5,
+      "primary": "LLTTLLLLTLLLTLLTTTTTTTTLLLTLTT",
+      "sha256": "0d33866836ae227645d15d580b8802e2e8a8dfdec5a626a5fbdfcc796cbb60b9"
+    },
+    {
+      "session_index": 6,
+      "primary": "TLTTLLLLLTLLTTTLTLLLLLTTTTLTTT",
+      "sha256": "67559ed2f9d67d7b2cf25878dfaf39469cf09d549719d97a6367c2d101414faa"
+    }
+  ]
+}

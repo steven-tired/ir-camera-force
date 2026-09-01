@@ -17,6 +17,11 @@ dependencies = [
 include = ["ir_force*"]
 
 [tool.pytest.ini_options]
-addopts = "-ra"
+addopts = "-ra --import-mode=importlib"
+# The two IR lines have 15 same-named test files (tests/ and tests/classifier/).
+# importlib mode gives each its own module identity without __init__.py files,
+# which would otherwise change the rootdir semantics conftest.py relies on.
+pythonpath = [".", "experiments", "experiments/classifier"]
+consider_namespace_packages = true
 norecursedirs = ["local", ".git", "*.egg-info", "__pycache__"]
 testpaths = ["tests"]

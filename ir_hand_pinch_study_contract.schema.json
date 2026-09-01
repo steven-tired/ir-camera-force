@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ir-hand-pinch-study-contract.schema.json",
+  "title": "IR hand pinch immutable study contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "participant_pseudonym",
+    "session_indices",
+    "distinct_calendar_days",
+    "preregistration_sha256",
+    "schedule_sha256",
+    "labels",
+    "completed_trials_per_class",
+    "technical_abort_reserves_per_class",
+    "technical_abort_reason_codes",
+    "feature_contract",
+    "roi_contract_sha256",
+    "code_artifact_sha256",
+    "software_versions",
+    "acquisition"
+  ],
+  "properties": {
+    "schema_version": {"const": "ir-hand-pinch-study-contract/v1"},
+    "participant_pseudonym": {"type": "string", "minLength": 1},
+    "session_indices": {"const": [1, 2, 3, 4, 5, 6]},
+    "distinct_calendar_days": {"const": true},
+    "preregistration_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "schedule_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "labels": {"const": ["loose", "tight"]},
+    "completed_trials_per_class": {"const": 15},
+    "technical_abort_reserves_per_class": {"const": 5},
+    "technical_abort_reason_codes": {
+      "const": [
+        "pretrial_ffc_failed",
+        "acquisition_process_exit",
+        "realsense_disconnect",
+        "lepton_stream_disconnect",
+        "required_file_write_failed",
+        "trial_timing_controller_failed"
+      ]
+    },
+    "feature_contract": {
+      "const": {
+        "RS1": {
+          "definition": "thumb-index RGB pixel distance divided by landmark 5-to-17 palm scale",
+          "unit": "ratio",
+          "aggregate": "median"
+        },
+        "RS2": {
+          "definition": "absolute aligned thumb-index Z difference",
+          "unit": "metre",
+          "aggregate": "median"
+        },
+        "delta_T": {
+          "definition": "pinch-window TLinear temperature minus adjacent hand-skin baseline",
+          "unit": "kelvin",
+          "aggregate": "median"
+        }
+      }
+    },
+    "roi_contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "code_artifact_sha256": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preregistration", "schedule", "recorder_config"],
+      "properties": {
+        "preregistration": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "schedule": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "recorder_config": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "software_versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["python", "numpy", "scikit_learn", "git_commit"],
+      "properties": {
+        "python": {"type": "string", "minLength": 1},
+        "numpy": {"type": "string", "minLength": 1},
+        "scikit_learn": {"const": "1.9.0"},
+        "git_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "acquisition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "realsense_serial",
+        "realsense_color_profile",
+        "realsense_depth_profile",
+        "expected_aligned_realsense_fps",
+        "minimum_realsense_frames",
+        "realsense_minimum_yield_fraction",
+        "analysis_window_seconds",
+        "minimum_thermal_frames",
+        "manual_ffc",
+        "footer_telemetry"
+      ],
+      "properties": {
+        "realsense_serial": {"const": "233522078685"},
+        "realsense_color_profile": {"const": "640x480 BGR8 @ 30 Hz"},
+        "realsense_depth_profile": {"const": "640x480 Z16 @ 30 Hz"},
+        "expected_aligned_realsense_fps": {"const": 30},
+        "minimum_realsense_frames": {"const": 30},
+        "realsense_minimum_yield_fraction": {"const": 0.5},
+        "analysis_window_seconds": {"const": 2.0},
+        "minimum_thermal_frames": {"const": 9},
+        "manual_ffc": {"const": true},
+        "footer_telemetry": {"const": true}
+      }
+    }
+  }
+}
