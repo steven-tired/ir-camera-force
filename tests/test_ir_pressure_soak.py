@@ -31,6 +31,9 @@ ROBOT_FREE_MODULES = [
     # guard drags in lerobot.motors and a serial stack -- exactly what the
     # `prohibited` list below exists to catch.
     "lerobot_teleoperator_so101_webcam",
+    # grip.mediapipe reaches ee_control for the latched-mode ratchet. ee_control
+    # is pure numpy mapping, so it stays inside the robot-free set.
+    "lerobot_teleoperator_so101_webcam.ee_control",
     "lerobot_teleoperator_so101_webcam.grip",
     "lerobot_teleoperator_so101_webcam.grip.contract",
     "lerobot_teleoperator_so101_webcam.grip.mediapipe",
