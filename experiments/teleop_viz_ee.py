@@ -42,7 +42,11 @@ from webcam_input.wrist_estimator import WebcamWristEstimator
 
 from lerobot_teleoperator_so101_webcam.config_so101_webcam_ee import SO101WebcamEEConfig
 from lerobot_teleoperator_so101_webcam.ee_control import gripper_pos_from_pinch
+from lerobot_teleoperator_so101_webcam.ee_control import joint_center
 from lerobot_teleoperator_so101_webcam.ee_controller import WebcamEEController
+from pressurevision_integration.pv_grip_adapter import PVGripAdapter
+from pressurevision_integration.pv_grip_controller import PressureVisionGripRuntime
+from pressurevision_integration.pv_shadow_telemetry import pv_shadow_sample
 from lerobot_teleoperator_so101_webcam.hand_startup_gate import (
     HAND_STARTUP_DWELL_S,
     MAX_WRIST_ROLL_RANGE_DEG,
@@ -180,7 +184,7 @@ def validate_pv_apply_evidence_gate(args) -> Path | None:
     return oak_video
 
 
-def write_pv_control_contract(args, controller: WebcamEEController) -> None:
+def write_pv_control_contract(args, pv) -> None:
     """Persist the exact live mapping without changing historical mapping names."""
     if not bool(getattr(args, "pv_pressure", False)):
         return
@@ -188,7 +192,7 @@ def write_pv_control_contract(args, controller: WebcamEEController) -> None:
     contract = {
         "schema_version": 1,
         "control_rate_hz": 30,
-        "pv_mapping_contract": controller.mapping_contract,
+        "pv_mapping_contract": pv.mapping_contract,
         "wrist_roll_range_deg": float(args.wrist_roll_range_deg),
         "wrist_roll_gain": float(args.wrist_roll_gain),
     }
@@ -686,26 +690,45 @@ def _run_live(args, resources: ExitStack) -> None:
     close_pressure = getattr(ir_runtime.pressure_source, "close", None)
     if callable(close_pressure):
         resources.callback(close_pressure)
+    # Pressure lives in its own runtime now; the controller owns arm motion and
+    # reaches it through the gripper contract. The runtime is source-agnostic --
+    # the IR estimator and the PV sender present the same update() -- so both
+    # paths go through one object.
+    middle_gripper = joint_center(robot.bus.motors["gripper"].norm_mode.value)
+    pv = None
+    gripper = None
+    if ir_runtime.pressure_source is not None:
+        pv = PressureVisionGripRuntime(
+            ir_runtime.pressure_source,
+            initial_gripper=middle_gripper,
+            middle_gripper=middle_gripper,
+            pressure_shadow=ir_runtime.pressure_shadow,
+            pressure_apply=ir_runtime.pressure_apply,
+            object_profile=ir_runtime.object_profile,
+            object_profile_sha256=ir_runtime.object_profile_sha256,
+            trial_protocol=ir_runtime.trial_protocol,
+            pv_mapping=ir_runtime.pv_mapping,
+            gripper_closure_limits=ir_runtime.gripper_closure_limits,
+        )
+        gripper = PVGripAdapter(pv)
+        resources.callback(pv.close)
     controller = WebcamEEController(
         robot,
         kin,
         cfg,
         use_oak=use_oak,
-        pressure_source=ir_runtime.pressure_source,
-        pressure_shadow=ir_runtime.pressure_shadow,
-        pressure_apply=ir_runtime.pressure_apply,
-        object_profile=ir_runtime.object_profile,
-        object_profile_sha256=ir_runtime.object_profile_sha256,
-        trial_protocol=ir_runtime.trial_protocol,
-        pv_mapping=ir_runtime.pv_mapping,
-        gripper_closure_limits=ir_runtime.gripper_closure_limits,
+        gripper=gripper,
+        # The left hand is on the pressure pad, so a left fist is not a gesture
+        # this operator can make.
+        middle_gesture="right_v",
         grip_mode=args.grip_mode,
         grip_map=args.grip_map,
         wrist_roll_range_deg=getattr(args, "wrist_roll_range_deg", 0.0),
         wrist_roll_gain=getattr(args, "wrist_roll_gain", 1.0),
     )
     resources.callback(controller.close)
-    write_pv_control_contract(args, controller)
+    if pv is not None:
+        write_pv_control_contract(args, pv)
 
     # Open the normal operator window before gating the first commanded motion.
     if use_oak:
@@ -823,7 +846,8 @@ def _run_live(args, resources: ExitStack) -> None:
         else None
     )
     if motor_sampler is not None:
-        controller.set_gripper_telemetry(motor_sampler.poll(robot, force=True))
+        if pv is not None:
+            pv.set_telemetry(motor_sampler.poll(robot, force=True))
     print(f"EE centre (ready FK): {np.round(ee_centre, 3)}  down rotvec: {np.round(controller.r_down, 3)}")
 
     comm_failures = 0
@@ -854,19 +878,31 @@ def _run_live(args, resources: ExitStack) -> None:
                 draw.draw_landmarks(frame, hand_lms, mp.solutions.hands.HAND_CONNECTIONS)
 
         # All control (down orientation, slew, EMA, right-V/HOLD) lives in the shared controller.
+        control_observed_at_s = time.perf_counter()
         joints, state = controller.step(wrist, landmarks)
+        telemetry_sample = (
+            None
+            if pv is None
+            else pv_shadow_sample(
+                pv,
+                control_observed_at_s=control_observed_at_s,
+                state=state,
+                pinch=controller.last_pinch,
+            )
+        )
         try:
             if send_live_action(
                 robot,
                 joints,
                 sidecar=ir_runtime.sidecar,
-                telemetry_sample=controller.last_ir_shadow_telemetry,
+                telemetry_sample=telemetry_sample,
                 motor_sampler=motor_sampler,
             ):
                 joint_act = joints
                 comm_failures = 0
             if motor_sampler is not None:
-                controller.set_gripper_telemetry(motor_sampler.latest)
+                if pv is not None:
+                    pv.set_telemetry(motor_sampler.latest)
             # else HOLD: send nothing; arm holds its last commanded pose.
         except ConnectionError as e:
             comm_failures += 1
@@ -879,7 +915,7 @@ def _run_live(args, resources: ExitStack) -> None:
         lm = np.asarray(landmarks.landmarks, dtype=float)
         pinch = float(np.linalg.norm(lm[_THUMB_TIP] - lm[_INDEX_TIP]))
         color = {"MOVING": (0, 200, 0), "MIDDLE": (0, 165, 255), "HOLD": (0, 0, 255)}[state]
-        pressure = controller.last_pressure
+        pressure = None if pv is None else pv.last_pressure
         pressure_line = "pressure: off"
         if pressure is not None:
             sensor = "PV" if getattr(pressure, "roi_mode", None) == "pv" else "IR"
@@ -897,7 +933,7 @@ def _run_live(args, resources: ExitStack) -> None:
             f"CONTROL: {state}  gripper={gripper_pos_from_pinch(pinch, cfg) if state == 'MOVING' else 0.0:5.1f}",
             pressure_line,
         ]
-        relative = controller.last_relative_grip
+        relative = None if pv is None else pv.last_relative_grip
         if relative is not None:
             track_state = (
                 "WAIT" if relative.track_hold is None else relative.track_hold.state
@@ -906,17 +942,17 @@ def _run_live(args, resources: ExitStack) -> None:
             target = "--" if relative.target_pos is None else f"{relative.target_pos:.2f}"
             actual = (
                 "--"
-                if controller.last_pressure_control is None
-                else f"{controller.last_pressure_control.actual_gripper:.2f}"
+                if pv.last_pressure_control is None
+                else f"{pv.last_pressure_control.actual_gripper:.2f}"
             )
-            mode = "APPLY" if controller.pressure_apply else "SHADOW"
+            mode = "APPLY" if pv.pressure_apply else "SHADOW"
             lines.append(
-                f"PV {controller.pv_mapping.upper()} {mode}: "
+                f"PV {pv.pv_mapping.upper()} {mode}: "
                 f"{relative.status}/{track_state} ref={reference} "
                 f"target={target} sent={actual}"
             )
-        if controller.trial_protocol is not None:
-            expected = controller.trial_protocol.expected(time.perf_counter())
+        if pv is not None and pv.trial_protocol is not None:
+            expected = pv.trial_protocol.expected(time.perf_counter())
             if expected is None:
                 lines.append("PV protocol: complete")
             else:
