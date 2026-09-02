@@ -38,6 +38,9 @@ ROBOT_FREE_MODULES = [
     "lerobot_teleoperator_so101_webcam.grip.contract",
     "lerobot_teleoperator_so101_webcam.grip.mediapipe",
     "lerobot_teleoperator_so101_webcam.grip.proposal",
+    # The generic CSV logger behind ir_shadow_telemetry. stdlib only -- the PV
+    # extension is imported lazily and so stays out of an IR-only soak.
+    "lerobot_teleoperator_so101_webcam.shadow_telemetry",
 ]
 
 

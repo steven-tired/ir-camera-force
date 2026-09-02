@@ -1,7 +1,14 @@
+"""The IR rows of the shadow-telemetry CSV.
+
+The generic logger is covered in the public core's test_shadow_telemetry, and
+the PV schema-v7 columns in the PV package's test_pv_shadow_telemetry. What is
+tested here is what stayed IR's: schema version "1", and that the existing
+constructor still produces the v1 row the recorded IR CSVs are read as.
+"""
+
 import csv
 import importlib
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
@@ -140,101 +147,3 @@ def test_sidecar_write_failure_prints_once_disables_and_never_raises(tmp_path: P
     output = capsys.readouterr().out
     assert output.count("[ir-sidecar] disabled") == 1
     assert "disk unavailable" in output
-
-
-def test_pv_sidecar_distinguishes_command_from_rate_limited_motor_readback(tmp_path: Path):
-    module = _telemetry_module()
-    path = tmp_path / "pv.csv"
-    logger = module.IRShadowTelemetryLogger(
-        path,
-        clock=lambda: 10.01,
-        extra_fields=module.PV_SHADOW_FIELDS,
-    )
-    sample = _sample(module)
-    sample = module.IRShadowTelemetrySample(
-        **{
-            **sample.__dict__,
-            "relative_reference_pos": 27.0,
-            "relative_closure": 1.5,
-            "relative_mapping_status": "active",
-            "relative_track_hold_state": "HOLD",
-            "relative_track_hold_residual": 0.04,
-            "relative_track_hold_output": 0.75,
-            "pv_adjustment_state": "temporary_hold",
-            "pv_adjustment_event": "contact_lost",
-            "pv_adjustment_anchor_target": 27.0,
-            "pv_adjustment_release_since_s": 9.95,
-            "pv_adjustment_release_elapsed_s": 0.05,
-            "pv_adjustment_last_contact_at_s": 9.94,
-            "pv_adjustment_recontact_since_s": None,
-        }
-    )
-    motor = SimpleNamespace(
-        observed_at_s=9.99,
-        observed_gripper_pos=27.4,
-        present_current=18,
-        present_load=31,
-        present_temperature=34,
-    )
-
-    logger.finalize(sample, command_sent=True, motor_telemetry=motor)
-    logger.close()
-
-    with path.open(newline="", encoding="utf-8") as handle:
-        row = next(csv.DictReader(handle))
-
-    assert row["schema_version"] == "7"
-    assert row["pv_sequence"] == "12"
-    assert row["pv_source_observed_at_s"] == "9.96"
-    assert row["pv_sent_at_s"] == "9.97"
-    assert row["pv_received_at_s"] == "9.98"
-    assert row["pv_frame_age_ms"] == "40.0"
-    assert row["actual_gripper_pos"] == "42.0"
-    assert row["commanded_gripper_pos"] == "42.0"
-    assert float(row["motor_sample_age_ms"]) == pytest.approx(20.0)
-    assert row["motor_sample_valid"] == "true"
-    assert row["observed_gripper_pos"] == "27.4"
-    assert row["observed_gripper_pos_valid"] == "true"
-    assert row["present_current"] == "18"
-    assert row["present_current_valid"] == "true"
-    assert row["present_load"] == "31"
-    assert row["present_load_valid"] == "true"
-    assert row["present_temperature"] == "34"
-    assert row["present_temperature_valid"] == "true"
-    assert row["pv_adjustment_state"] == "temporary_hold"
-    assert row["pv_adjustment_event"] == "contact_lost"
-    assert row["pv_adjustment_anchor_target"] == "27.0"
-    assert row["pv_adjustment_release_since_s"] == "9.95"
-    assert row["pv_adjustment_release_elapsed_s"] == "0.05"
-    assert row["pv_adjustment_last_contact_at_s"] == "9.94"
-    assert row["pv_adjustment_recontact_since_s"] == ""
-    assert row["relative_reference_pos"] == "27.0"
-    assert row["relative_closure"] == "1.5"
-    assert row["relative_mapping_status"] == "active"
-    assert row["relative_track_hold_state"] == "HOLD"
-    assert row["relative_track_hold_residual"] == "0.04"
-    assert row["relative_track_hold_output"] == "0.75"
-
-
-def test_pv_sidecar_marks_missing_motor_sample_without_inventing_values(tmp_path: Path):
-    module = _telemetry_module()
-    path = tmp_path / "pv-missing.csv"
-    logger = module.IRShadowTelemetryLogger(
-        path,
-        clock=lambda: 10.01,
-        extra_fields=module.PV_SHADOW_FIELDS,
-    )
-
-    logger.finalize(_sample(module), command_sent=True, motor_telemetry=None)
-    logger.close()
-
-    with path.open(newline="", encoding="utf-8") as handle:
-        row = next(csv.DictReader(handle))
-
-    assert row["motor_observed_at_s"] == ""
-    assert row["motor_sample_age_ms"] == ""
-    assert row["motor_sample_valid"] == "false"
-    assert row["observed_gripper_pos_valid"] == "false"
-    assert row["present_current_valid"] == "false"
-    assert row["present_load_valid"] == "false"
-    assert row["present_temperature_valid"] == "false"

@@ -65,10 +65,8 @@ from lerobot_teleoperator_so101_webcam.gripper_hardware import (
     GripperClosureLimits,
     GripperTelemetrySampler,
 )
-from ir_force.ir_shadow_telemetry import (
-    IRShadowTelemetryLogger,
-    PV_SHADOW_FIELDS,
-)
+from ir_force.ir_shadow_telemetry import IRShadowTelemetryLogger
+from pressurevision_integration.pv_shadow_telemetry import PV_SHADOW_FIELDS
 from pressurevision_integration.pv_object_profile import (
     load_object_profile,
     object_profile_sha256,
