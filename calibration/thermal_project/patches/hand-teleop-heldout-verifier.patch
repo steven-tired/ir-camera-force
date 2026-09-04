@@ -1,0 +1,871 @@
+diff --git a/.gitignore b/.gitignore
+index 51a58f3..7a71ee8 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -7,4 +7,5 @@
+ **/color_images
+ **/thermal_images
+ **/tmp
+-**/test
+\ No newline at end of file
++**/test
++calibration/compute_out/
+diff --git a/README.md b/README.md
+index 370b800..ee56b86 100644
+--- a/README.md
++++ b/README.md
+@@ -37,10 +37,10 @@ I set up the RaspberryPi with a Lepton 3.1R. The thermal camera communicates bet
+ 
+ To set up a point cloud of your own, follow these steps:
+ - First connect up an RPi with a Lepton camera using this [package](https://github.com/AnujN9/LeptonModule/tree/master/software/raspberrypi_video_network) to send raw data. You can find a [3D printable case](docs/thermal_case.step) that can house an RPi, Lepton camera and a Realsense as one unit.
+-- Once it is set up and streams data from the ethernet, use ```./lepton``` to stream the images and save images for calibration. Once you have saved atleast 10 images, move them to `calibration/thermal_images`.
+-- Based on the pattern, calibrate the thermal camera using ```./camera_calibration``` in `calibration` to find out the intrinsics. I have attached a [pattern](docs/chessboard_pattern.dxf) for a 3 by 4 chessboard pattern which can be laser cut.
+-- Save atleast 10 pairs of thermal and rgb images from `stream` using ```./depth_saver``` to calibrate the extrinsics. Use a chessboard pattern and move the thermal images to `calibration/thermal_images` and color images to `calibration/color_images`.
+-- Run ```./extrinsic``` to find the transform of the thermal camera in the rgb frame.
++- Once it is set up and streams data from the ethernet, use ```./lepton``` to stream the images and save images for calibration. Collect more than 10 views so at least 10 complete detections remain, and place `thermal_grayimage_N.png` in `calibration/thermal_images`.
++- The supplied [pattern](docs/chessboard_pattern.dxf) has 5x4 physical squares (30 mm) and therefore 4x3 OpenCV inner corners. Run ```./camera_calibration -r 4 -c 5 -n <image-count> -pat 1``` from the calibration build directory to find the intrinsics.
++- Capture thermal/RGB pairs with ```./depth_saver```. Hold the board stationary while pressing `c`, then place `thermal_grayimage_N.png` in `calibration/thermal_images` and `color_image_N.png` in `calibration/color_images`. At least 10 pairs must have complete detections in both cameras.
++- Run ```./extrinsic -r 4 -c 5 -n <pair-count>``` from the calibration build directory to find the transform of the thermal camera in the RGB frame.
+ - `pointcloud` is used to generate point clouds. Move the 2 .xml files from `calibration` to `pointcloud`. Use ```./thermalPC``` to generate a stream of point clouds. You can save a point cloud by pressing 's'. Use ```./loadPC``` to load that saved point cloud.
+ 
+ 
+@@ -48,4 +48,4 @@ To set up a point cloud of your own, follow these steps:
+ 
+ - https://henryzh47.github.io/assets/documents/multiple-methods-geometric.pdf
+ - https://github.com/groupgets/LeptonModule
+-- https://github.com/IntelRealSense/librealsense/blob/development/wrappers/pcl/pcl/rs-pcl.cpp
+\ No newline at end of file
++- https://github.com/IntelRealSense/librealsense/blob/development/wrappers/pcl/pcl/rs-pcl.cpp
+diff --git a/calibration/CMakeLists.txt b/calibration/CMakeLists.txt
+index 0fe2111..8bd9849 100644
+--- a/calibration/CMakeLists.txt
++++ b/calibration/CMakeLists.txt
+@@ -1,6 +1,8 @@
+ cmake_minimum_required(VERSION 3.10)
+ project(Calibration)
+ 
++include(CTest)
++
+ # Set the C++ standard
+ set(CMAKE_CXX_STANDARD 14)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+@@ -11,6 +13,7 @@ find_package(realsense2 REQUIRED)
+ 
+ # Include directories for OpenCV
+ include_directories(${OpenCV_INCLUDE_DIRS})
++include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+ 
+ # Define the Image directory for calibration
+ file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/thermal_images)
+@@ -19,11 +22,51 @@ add_definitions(-DTHERMAL_IMAGE_DIRECTORY="${CMAKE_SOURCE_DIR}/thermal_images")
+ add_definitions(-DIMAGE_DIRECTORY="${CMAKE_SOURCE_DIR}/color_images")
+ 
+ # Define the executable
++add_library(calibration_contracts CalibrationContracts.cpp)
++target_link_libraries(calibration_contracts PUBLIC ${OpenCV_LIBS})
++
++add_library(heldout_verifier HeldOutVerifier.cpp)
++target_link_libraries(heldout_verifier PUBLIC calibration_contracts ${OpenCV_LIBS})
++
+ add_executable(camera_calibration cal.cpp)
+ add_executable(verify_calibration verify.cpp)
+ add_executable(extrinsic extrinsic_cal.cpp)
++add_executable(resolve_extrinsic resolve_extrinsic.cpp)
++add_executable(heldout_verify heldout_verify.cpp)
+ 
+ # Link the libraries to executables
+-target_link_libraries(camera_calibration ${OpenCV_LIBS})
++target_link_libraries(camera_calibration calibration_contracts ${OpenCV_LIBS})
+ target_link_libraries(verify_calibration ${OpenCV_LIBS})
+-target_link_libraries(extrinsic ${OpenCV_LIBS} ${realsense2_LIBRARY})
+\ No newline at end of file
++target_link_libraries(extrinsic heldout_verifier calibration_contracts ${OpenCV_LIBS} ${realsense2_LIBRARY})
++target_link_libraries(resolve_extrinsic calibration_contracts ${OpenCV_LIBS} ${realsense2_LIBRARY})
++target_link_libraries(heldout_verify heldout_verifier calibration_contracts
++    ${OpenCV_LIBS} ${realsense2_LIBRARY})
++
++if(BUILD_TESTING)
++    find_package(Python3 REQUIRED COMPONENTS Interpreter)
++
++    add_executable(calibration_contract_test
++        tests/calibration_contract_test.cpp)
++    target_include_directories(calibration_contract_test PRIVATE
++        ${CMAKE_CURRENT_SOURCE_DIR}/include)
++    target_link_libraries(calibration_contract_test calibration_contracts ${OpenCV_LIBS})
++    add_test(NAME calibration_contract_test COMMAND calibration_contract_test)
++
++    add_executable(heldout_verifier_test tests/heldout_verifier_test.cpp)
++    target_include_directories(heldout_verifier_test PRIVATE
++        ${CMAKE_CURRENT_SOURCE_DIR}/include)
++    target_compile_definitions(heldout_verifier_test PRIVATE
++        HELDOUT_REPORT_JSON_PATH="${CMAKE_CURRENT_BINARY_DIR}/heldout_report.json")
++    target_link_libraries(heldout_verifier_test heldout_verifier calibration_contracts ${OpenCV_LIBS})
++    add_test(NAME heldout_verifier_test COMMAND heldout_verifier_test)
++    add_test(NAME heldout_report_stdlib_json_test
++        COMMAND ${Python3_EXECUTABLE}
++            ${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_report_json.py
++            ${CMAKE_CURRENT_BINARY_DIR}/heldout_report.json)
++    set_tests_properties(heldout_report_stdlib_json_test PROPERTIES
++        DEPENDS heldout_verifier_test)
++    add_test(NAME heldout_verify_help_test
++        COMMAND ${Python3_EXECUTABLE}
++            ${CMAKE_CURRENT_SOURCE_DIR}/tests/validate_help.py
++            $<TARGET_FILE:heldout_verify>)
++endif()
+diff --git a/calibration/README.md b/calibration/README.md
+index 1d845de..e154a06 100644
+--- a/calibration/README.md
++++ b/calibration/README.md
+@@ -16,13 +16,24 @@ Creates 3 executables, one for the thermal camera intrinsic calibration, one for
+ To calibrate the thermal camera, first ensure there are images in the `thermal_images` directory. When running you need to pass in parameters. Then run
+ 
+ ```
+-./camera_calibration 
++./camera_calibration
+     -r x    number of rows in the pattern
+     -c x    number of columns in the pattern
+     -n x    number of images
+-    -pat x  pattern type (chessboard or symmetric dot)
++    -pat x  pattern type (1: chessboard, 2: symmetric dot)
+ ```
+ 
++For the supplied checkerboard, put at least 10 successfully detected
++`thermal_grayimage_N.png` views in `thermal_images`, vary the board pose, and
++run:
++
++```
++./camera_calibration -r 4 -c 5 -n <image-count> -pat 1
++```
++
++For this checkerboard, `-r 4 -c 5` describes 4x5 physical squares at 30 mm
++spacing; OpenCV detects 4x3 inner corners.
++
+ This saves the intrinsics to a calibration.xml file. To see the undistorted images run
+ 
+ ```
+@@ -30,12 +41,9 @@ This saves the intrinsics to a calibration.xml file. To see the undistorted imag
+     -n x    number of images
+ ```
+ 
+-To calibrate the extrinsics, ensure there are thermal images in the `thermal_images` directory and color images in the `color_images` directory. When running you need to pass in parameters. Then run
++To calibrate the extrinsics, put matching `thermal_grayimage_N.png` files in `thermal_images` and `color_image_N.png` files in `color_images`. While capturing with `depth_saver`, hold the board stationary while pressing `c`. At least 10 pairs must have complete 4x3 inner-corner detections in both cameras. Then run
+ 
+ ```
+-./extrinsic 
+-    -r x    number of rows in the patterns
+-    -c x    number of columns in the patterns
+-    -n x    number of image pair (thermal and color)
++./extrinsic -r 4 -c 5 -n <pair-count>
+ ```
+ This will save the extrinsics between the thermal and rgb camera into an extrinsic.xml file.
+diff --git a/calibration/cal.cpp b/calibration/cal.cpp
+index ba0bb8b..8d779ee 100644
+--- a/calibration/cal.cpp
++++ b/calibration/cal.cpp
+@@ -3,6 +3,8 @@
+ #include <opencv2/core/types.hpp>
+ #include <opencv2/imgproc.hpp>
+ #include <opencv2/highgui.hpp>
++#include <CalibrationContracts.h>
++#include <cmath>
+ #include <iostream>
+ #include <vector>
+ 
+@@ -159,7 +161,8 @@ int main(int argc, char **argv)
+     Size patternSize;
+     if (pattern == 1)
+     {
+-        patternSize = Size(row - 1, column - 1);
++        patternSize = calibration::inner_corner_size(
++            calibration::BoardContract(row, column, 0.03));
+     }
+     else
+     {
+@@ -169,11 +172,15 @@ int main(int argc, char **argv)
+     vector<vector<Point3f>> objectPoints;
+ 
+     vector<Point3f> obj;
++    const float objectPointSpacing = pattern == 1 ? 0.03f : 1.0f;
+     for (int i = 0; i < patternSize.height; i++)
+     {
+         for (int j = 0; j < patternSize.width; j++)
+         {
+-            obj.push_back(Point3f((float)j, (float)i, 0));
++            obj.push_back(Point3f(
++                (float)j * objectPointSpacing,
++                (float)i * objectPointSpacing,
++                0));
+         }
+     }
+ 
+@@ -185,6 +192,7 @@ int main(int argc, char **argv)
+         images.push_back(imagePath);
+     }
+ 
++    Size imageSize;
+     for (size_t i = 0; i < images.size(); i++)
+     {
+         Mat image = imread(images[i], IMREAD_GRAYSCALE);
+@@ -193,15 +201,31 @@ int main(int argc, char **argv)
+             cout << "Cannot open image file: " << images[i] << endl;
+             continue;
+         }
++        if (image.size() != Size(160, 120))
++        {
++            cerr << "Thermal image must be 160x120: " << images[i] << endl;
++            continue;
++        }
++        if (imageSize.area() > 0 && image.size() != imageSize)
++        {
++            cerr << "Image size differs from the first accepted image: " << images[i] << endl;
++            continue;
++        }
+ 
+         if (pattern == 1)
+         {
+             vector<Point2f> corners;
+-            bool patternFound = findChessboardCorners(image, patternSize, corners, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
++            // findChessboardCornersSB robustly detects the laser-cut cut-out board
++            // (classic findChessboardCorners fails on it, esp. in RGB). SB is
++            // subpixel-native via CALIB_CB_ACCURACY, so no cornerSubPix follows.
++            bool patternFound = findChessboardCornersSB(image, patternSize, corners, CALIB_CB_EXHAUSTIVE | CALIB_CB_ACCURACY);
+ 
+             if (patternFound)
+             {
+-                cornerSubPix(image, corners, Size(11, 11), Size(-1, -1), TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 30, 0.1));
++                if (imageSize.area() == 0)
++                {
++                    imageSize = image.size();
++                }
+                 drawChessboardCorners(image, patternSize, Mat(corners), patternFound);
+                 imagePoints.push_back(corners);
+                 objectPoints.push_back(obj);
+@@ -225,6 +249,10 @@ int main(int argc, char **argv)
+ 
+             if (patternFound)
+             {
++                if (imageSize.area() == 0)
++                {
++                    imageSize = image.size();
++                }
+                 imagePoints.push_back(centers);
+                 objectPoints.push_back(obj);
+ 
+@@ -240,25 +268,38 @@ int main(int argc, char **argv)
+     }
+     destroyAllWindows();
+ 
+-    if (imagePoints.size() > 0 && objectPoints.size() > 0)
++    if (calibration::has_minimum_samples(imagePoints.size()) &&
++        calibration::has_minimum_samples(objectPoints.size()))
+     {
+         // Camera calibration
+         Mat cameraMatrix, distCoeffs;
+         vector<Mat> rvecs, tvecs;
+-        calibrateCamera(objectPoints, imagePoints, Size(patternSize.width, patternSize.height), cameraMatrix, distCoeffs, rvecs, tvecs);
++        double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs);
++        if (!std::isfinite(rms) ||
++            !calibration::valid_calibration_values(cameraMatrix, distCoeffs))
++        {
++            cerr << "Error: Calibration returned empty or non-finite values." << endl;
++            return -1;
++        }
+         cout << "Camera matrix: \n" << cameraMatrix << endl;
+         cout << "Distortion coefficients: \n" << distCoeffs << endl;
+ 
+         string calibrationfile = imageDirectory + "/../calibration.xml";
+         FileStorage fs(calibrationfile, FileStorage::WRITE);
++        if (!fs.isOpened())
++        {
++            cerr << "Error: Cannot open calibration.xml for writing." << endl;
++            return -1;
++        }
+         fs << "cameraMatrix" << cameraMatrix;
+         fs << "distCoeffs" << distCoeffs;
+         fs.release();
+     }
+     else
+     {
+-        cerr << "Error: Not enough valid patterns detected for calibration." << endl;
++        cerr << "Error: At least 10 valid patterns are required for calibration." << endl;
++        return -1;
+     }
+ 
+     return 0;
+-}
+\ No newline at end of file
++}
+diff --git a/calibration/extrinsic_cal.cpp b/calibration/extrinsic_cal.cpp
+index 8f86782..9d908db 100644
+--- a/calibration/extrinsic_cal.cpp
++++ b/calibration/extrinsic_cal.cpp
+@@ -1,6 +1,9 @@
+ #include <librealsense2/rs.hpp>
+ #include <opencv2/opencv.hpp>
+ #include <opencv2/calib3d.hpp>
++#include <CalibrationContracts.h>
++#include <HeldOutVerifier.h>
++#include <cmath>
+ #include <iostream>
+ #include <vector>
+ #include <string>
+@@ -104,15 +107,33 @@ int main(int argc, char **argv)
+     std::string imageDirectory = IMAGE_DIRECTORY;
+     std::string thermalimageDirectory = THERMAL_IMAGE_DIRECTORY;
+     std::string calibrationfile = imageDirectory + "/../calibration.xml";
+-    cv::FileStorage fs(calibrationfile, cv::FileStorage::READ);    
++    cv::FileStorage fs(calibrationfile, cv::FileStorage::READ);
++    if (!fs.isOpened())
++    {
++        std::cerr << "Failed to open calibration file: " << calibrationfile << std::endl;
++        return -1;
++    }
+     cv::Mat cameraMatrixThermal, distCoeffsThermal;
+     fs["cameraMatrix"] >> cameraMatrixThermal;
+     fs["distCoeffs"] >> distCoeffsThermal;
+     fs.release();
++    if (!calibration::valid_calibration_values(cameraMatrixThermal, distCoeffsThermal))
++    {
++        std::cerr << "Thermal intrinsics are empty or non-finite." << std::endl;
++        return -1;
++    }
+ 
+     rs2::pipeline pipe;
+-    pipe.start();
++    rs2::config cfg;
++    cfg.enable_stream(RS2_STREAM_COLOR, 1280, 720, RS2_FORMAT_RGB8, 15);
++    pipe.start(cfg);
+     auto color_stream = pipe.get_active_profile().get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
++    if (color_stream.width() != 1280 || color_stream.height() != 720 ||
++        color_stream.format() != RS2_FORMAT_RGB8 || color_stream.fps() != 15)
++    {
++        std::cerr << "Active color profile must be 1280x720@15 RGB8." << std::endl;
++        return -1;
++    }
+     rs2_intrinsics intrinsicsColor = color_stream.get_intrinsics();
+     cv::Mat cameraMatrixRealSense = (cv::Mat_<double>(3, 3) <<
+         intrinsicsColor.fx, 0, intrinsicsColor.ppx,
+@@ -120,59 +141,76 @@ int main(int argc, char **argv)
+         0, 0, 1);
+ 
+     cv::Mat distCoeffsRealSense = cv::Mat::zeros(5, 1, CV_64F);
+-    for (int i = 0; i < 5; ++i)
++    // Same coeff-aware rule as heldout_verify (single source of truth): accept
++    // NONE, BROWN_CONRADY, or all-zero INVERSE_BROWN_CONRADY; reject non-zero
++    // inverse coeffs (they must not be reinterpreted as OpenCV Brown-Conrady).
++    if (!calibration::supported_realsense_color_distortion(intrinsicsColor))
+     {
+-        distCoeffsRealSense.at<double>(i, 0) = intrinsicsColor.coeffs[i];
++        std::cerr << "RealSense color distortion model "
++                  << rs2_distortion_to_string(intrinsicsColor.model)
++                  << " with non-zero coefficients is incompatible with OpenCV"
++                     " Brown-Conrady coefficients." << std::endl;
++        return -1;
+     }
+-
+-    // Set up chessboard parameters
+-    double squareSize = 0.03;  // Square size in meters (30mm)
+-    std::vector<cv::Point3f> objectPoints;
+-    cv::Size patternSize(row, column); // Chessboard size
+-    for (int i = 0; i < patternSize.height; ++i)
++    if (intrinsicsColor.model == RS2_DISTORTION_BROWN_CONRADY)
+     {
+-        for (int j = 0; j < patternSize.width; ++j)
++        for (int i = 0; i < 5; ++i)
+         {
+-            objectPoints.emplace_back(j * squareSize, i * squareSize, 0);
++            distCoeffsRealSense.at<double>(i, 0) = intrinsicsColor.coeffs[i];
+         }
+     }
++    if (!calibration::valid_calibration_values(cameraMatrixRealSense, distCoeffsRealSense))
++    {
++        std::cerr << "RealSense intrinsics are empty or non-finite." << std::endl;
++        return -1;
++    }
++
++    // Set up chessboard parameters
++    calibration::BoardContract board(row, column, 0.03);
++    cv::Size patternSize = calibration::inner_corner_size(board);
++    std::vector<cv::Point3f> objectPoints = calibration::object_points(board);
+     std::vector<std::vector<cv::Point2f>> cornersColorVec, cornersThermalVec;
+     std::vector<std::vector<cv::Point3f>> objectPointsVec;
+ 
+     for (int imgIndex = 1; imgIndex <= n; ++imgIndex)
+     {
+-        std::string colorImagePath = imageDirectory + std::to_string(imgIndex) + ".png";
+-        std::string thermalImagePath = thermalimageDirectory + std::to_string(imgIndex) + ".png";
+-
+-        cv::Mat colorImage = cv::imread(colorImagePath, cv::IMREAD_COLOR);
+-        cv::Mat thermalImage = cv::imread(thermalImagePath, cv::IMREAD_GRAYSCALE);
+-        if (colorImage.empty() || thermalImage.empty())
++        calibration::CapturePair pair;
++        std::string pairError;
++        if (!calibration::load_capture_pair(
++                imageDirectory, thermalimageDirectory, imgIndex, pair, pairError))
+         {
+-            std::cerr << "Failed to load image pair " << imgIndex << std::endl;
++            std::cerr << pairError << std::endl;
+             continue;
+         }
+ 
+         std::vector<cv::Point2f> cornersColor, cornersThermal;
+-        bool foundColor = cv::findChessboardCorners(colorImage, patternSize, cornersColor);
+-        bool foundThermal = cv::findChessboardCorners(thermalImage, patternSize, cornersThermal);
++        // findChessboardCornersSB (subpixel-native via CALIB_CB_ACCURACY) detects
++        // the cut-out board where classic findChessboardCorners fails on RGB.
++        bool foundColor = cv::findChessboardCornersSB(
++            pair.color_gray, patternSize, cornersColor,
++            cv::CALIB_CB_EXHAUSTIVE | cv::CALIB_CB_ACCURACY);
++        bool foundThermal = cv::findChessboardCornersSB(
++            pair.thermal_gray, patternSize, cornersThermal,
++            cv::CALIB_CB_EXHAUSTIVE | cv::CALIB_CB_ACCURACY);
+         if (!foundColor || !foundThermal)
+         {
+             std::cerr << "Chessboard corners not found in image pair " << imgIndex << std::endl;
+             continue;
+         }
+ 
+-        cv::cornerSubPix(colorImage, cornersColor, cv::Size(7, 7), cv::Size(-1, -1),
+-                            cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.1));
+-        cv::cornerSubPix(thermalImage, cornersThermal, cv::Size(3, 3), cv::Size(-1, -1),
+-                            cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30, 0.1));
++        // Align the color and thermal corner sequences to one geometric origin so
++        // corners[i] is the same physical corner in both (required by stereoCalibrate).
++        calibration::canonicalize_corner_order(cornersColor);
++        calibration::canonicalize_corner_order(cornersThermal);
+         cornersColorVec.push_back(cornersColor);
+         cornersThermalVec.push_back(cornersThermal);
+         objectPointsVec.push_back(objectPoints);
+     }
+ 
+-    if (cornersColorVec.empty() || cornersThermalVec.empty())
++    if (!calibration::has_minimum_samples(cornersColorVec.size()) ||
++        !calibration::has_minimum_samples(cornersThermalVec.size()))
+     {
+-        std::cerr << "No valid chessboard corners detected in the images!" << std::endl;
++        std::cerr << "At least 10 valid paired chessboard detections are required." << std::endl;
+         return -1;
+     }
+ 
+@@ -183,11 +221,24 @@ int main(int argc, char **argv)
+                         cv::Size(), R, T, E, F,
+                         cv::CALIB_FIX_INTRINSIC);
+ 
++    if (!std::isfinite(reprojectionError) ||
++        !calibration::valid_calibration_values(R, T) ||
++        !calibration::valid_calibration_values(E, F))
++    {
++        std::cerr << "Stereo calibration returned empty or non-finite values." << std::endl;
++        return -1;
++    }
++
+     std::cout << "Rotation Matrix:\n" << R << std::endl;
+     std::cout << "Translation Vector:\n" << T << std::endl;
+ 
+     std::string extfile = imageDirectory + "/../extrinsic.xml";
+     cv::FileStorage fsOut(extfile, cv::FileStorage::WRITE);
++    if (!fsOut.isOpened())
++    {
++        std::cerr << "Failed to open extrinsic.xml for writing." << std::endl;
++        return -1;
++    }
+     fsOut << "R" << R;
+     fsOut << "T" << T;
+     fsOut << "E" << E;
+diff --git a/stream/CMakeLists.txt b/stream/CMakeLists.txt
+index 087e26d..229a26c 100644
+--- a/stream/CMakeLists.txt
++++ b/stream/CMakeLists.txt
+@@ -1,6 +1,8 @@
+ cmake_minimum_required(VERSION 3.10)
+ project(lepton_project)
+ 
++include(CTest)
++
+ # Set the C++ standard
+ set(CMAKE_CXX_STANDARD 14)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+@@ -18,8 +20,27 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/thermal_images)
+ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/images)
+ 
+ # Define the executable
+-add_executable(lepton lepton.cpp Palettes.cpp)
+-add_executable(depth_saver depthimage.cpp Palettes.cpp)
++add_executable(lepton lepton.cpp Palettes.cpp ThermalFrameAssembler.cpp)
++add_executable(depth_saver depthimage.cpp Palettes.cpp ThermalFrameAssembler.cpp
++    RealSenseCaptureContract.cpp)
++
++if(BUILD_TESTING)
++    add_executable(thermal_frame_assembler_test
++        tests/thermal_frame_assembler_test.cpp
++        ThermalFrameAssembler.cpp)
++    target_include_directories(thermal_frame_assembler_test PRIVATE
++        ${CMAKE_CURRENT_SOURCE_DIR}/include)
++    add_test(NAME thermal_frame_assembler_test COMMAND thermal_frame_assembler_test)
++
++    add_executable(stream_contract_test
++        tests/stream_contract_test.cpp
++        RealSenseCaptureContract.cpp)
++    target_include_directories(stream_contract_test PRIVATE
++        ${CMAKE_CURRENT_SOURCE_DIR}/include)
++    target_compile_definitions(stream_contract_test PRIVATE
++        DEPTHIMAGE_SOURCE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/depthimage.cpp")
++    add_test(NAME stream_contract_test COMMAND stream_contract_test)
++endif()
+ 
+ # Link the libraries
+ target_link_libraries(lepton ${OpenCV_LIBS})
+diff --git a/stream/depthimage.cpp b/stream/depthimage.cpp
+index f329443..bf47d63 100644
+--- a/stream/depthimage.cpp
++++ b/stream/depthimage.cpp
+@@ -7,14 +7,15 @@
+ #include <chrono>
+ #include <cstdint>
+ #include <cstring>
++#include <array>
++#include <stdexcept>
++#include <vector>
+ #include <arpa/inet.h>
+ #include <unistd.h>
+ #include <Palettes.h>
++#include <ThermalFrameAssembler.h>
++#include <RealSenseCaptureContract.h>
+ 
+-#define PACKET_SIZE 164
+-#define PACKET_SIZE_UINT16 (PACKET_SIZE/2)
+-#define PACKETS_PER_FRAME 60
+-#define FRAME_SIZE_UINT16 (PACKET_SIZE_UINT16*PACKETS_PER_FRAME)
+ #define FPS 27;
+ 
+ /// \file depthimage.cpp
+@@ -62,7 +63,6 @@ try
+ 	int myImageWidth = 160;
+ 	int myImageHeight = 120;
+ 	int img_cnt = 0;
+-	bool first = true;
+ 	uint16_t port = 8080;
+ 
+ 	for(int i=1; i < argc; i++)
+@@ -127,7 +127,9 @@ try
+ 		}
+ 	}
+ 
+-	uint8_t shelf[4][PACKET_SIZE*PACKETS_PER_FRAME];
++	thermal_stream::ThermalFrameAssembler thermalAssembler;
++	std::array<uint8_t, thermal_stream::ThermalFrameAssembler::kDatagramBytes + 1> datagram;
++	std::vector<uint16_t> thermalFrame;
+ 
+ 	uint16_t minValue = rangeMin;
+ 	uint16_t maxValue = rangeMax;
+@@ -164,9 +166,30 @@ try
+     // Declare RealSense pipeline
+     rs2::pipeline pipe;
+     rs2::config cfg;
+-    cfg.enable_stream(RS2_STREAM_DEPTH, 1280, 720, RS2_FORMAT_Z16);
+-    cfg.enable_stream(RS2_STREAM_COLOR, 1280, 720, RS2_FORMAT_RGB8);
+-    pipe.start(cfg);
++    cfg.enable_device(thermal_stream::kExpectedRealSenseSerial);
++    cfg.enable_stream(RS2_STREAM_DEPTH, 1280, 720, RS2_FORMAT_Z16, 6);
++    cfg.enable_stream(RS2_STREAM_COLOR, 1280, 720, RS2_FORMAT_RGB8, 15);
++    const rs2::pipeline_profile activeProfile = pipe.start(cfg);
++    const auto colorProfile = activeProfile.get_stream(RS2_STREAM_COLOR)
++        .as<rs2::video_stream_profile>();
++    const auto depthProfile = activeProfile.get_stream(RS2_STREAM_DEPTH)
++        .as<rs2::video_stream_profile>();
++    const thermal_stream::RealSenseCaptureProfile observedProfile{
++        activeProfile.get_device().get_info(RS2_CAMERA_INFO_SERIAL_NUMBER),
++        colorProfile.width(),
++        colorProfile.height(),
++        colorProfile.format(),
++        colorProfile.fps(),
++        depthProfile.width(),
++        depthProfile.height(),
++        depthProfile.format(),
++        depthProfile.fps(),
++    };
++    if (!thermal_stream::matches_calibration_capture_contract(observedProfile))
++    {
++        throw std::runtime_error("Active RealSense does not match the calibration capture contract");
++    }
++    std::cout << "RealSense capture contract: serial=233522078685 color=1280x720 RGB8@15 depth=1280x720 Z16@6" << std::endl;
+     rs2::align align_to_color(RS2_STREAM_COLOR);
+ 
+     int frame_counter = 0;
+@@ -177,20 +200,20 @@ try
+ 		frames = align_to_color.process(frames);
+ 		rs2::frame color_frame = frames.get_color_frame();
+ 
+-        for (int i = 0; i < 4; ++i)
++        bool thermalFrameComplete = false;
++        while (!thermalFrameComplete)
+ 		{
+-            ssize_t received_bytes = recvfrom(sockfd, shelf[i], sizeof(shelf[i]), 0, (struct sockaddr *)&cliaddr, &len);
++            ssize_t received_bytes = recvfrom(sockfd, datagram.data(), datagram.size(), 0,
++                                              (struct sockaddr *)&cliaddr, &len);
+             if (received_bytes < 0)
+ 			{
+                 std::cerr << "Receive failed" << std::endl;
+                 close(sockfd);
+                 return -1;
+             }
+-			if (first && i == 1)
+-			{
+-				first = false;
+-				break;
+-			}
++			thermalFrameComplete = thermalAssembler.add_datagram(
++				datagram.data(), static_cast<std::size_t>(received_bytes), thermalFrame) ==
++				thermal_stream::ThermalFrameAssembler::Result::Complete;
+         }
+         if (autoRangeMin || autoRangeMax)
+ 		{
+@@ -202,28 +225,20 @@ try
+ 			{
+ 				maxValue = 0;
+ 			}
+-			for (int iSegment = 1; iSegment <= 4; iSegment++)
++			for (std::size_t i = 0; i < thermalFrame.size(); ++i)
+ 			{
+-				for (int i=0;i<FRAME_SIZE_UINT16;i++)
++				uint16_t value = thermalFrame[i];
++				if (value == 0)
+ 				{
+-					if (i % PACKET_SIZE_UINT16 < 2)
+-					{
+-						continue;
+-					}
+-
+-					uint16_t value = (shelf[iSegment - 1][i*2] << 8) + shelf[iSegment - 1][i*2+1];
+-					if (value == 0)
+-					{
+-						continue;
+-					}
+-					if (autoRangeMax && (value > maxValue))
+-					{
+-						maxValue = value;
+-					}
+-					if (autoRangeMin && (value < minValue))
+-					{
+-						minValue = value;
+-					}
++					continue;
++				}
++				if (autoRangeMax && (value > maxValue))
++				{
++					maxValue = value;
++				}
++				if (autoRangeMin && (value < minValue))
++				{
++					minValue = value;
+ 				}
+ 			}
+ 			diff = maxValue - minValue;
+@@ -232,22 +247,20 @@ try
+ 		int row, column;
+ 		uint16_t value;
+ 		uint16_t valueFrameBuffer;
+-		for (int iSegment = 1; iSegment <= 4; iSegment++)
++		const auto renderRanges = thermal_stream::renderable_pixel_ranges(thermalFrame);
++		for (std::size_t segment = 0; segment < renderRanges.size(); ++segment)
+ 		{
+-			int ofsRow = 30 * (iSegment - 1);
+-			for (int i=0;i<FRAME_SIZE_UINT16;i++)
++			const auto &range = renderRanges[segment];
++			const std::size_t segmentEnd = segment + 1 < renderRanges.size()
++				? renderRanges[segment + 1].begin
++				: thermalFrame.size();
++			if (range.end < segmentEnd)
+ 			{
+-				if (i % PACKET_SIZE_UINT16 < 2)
+-				{
+-					continue;
+-				}
+-
+-				valueFrameBuffer = (shelf[iSegment - 1][i*2] << 8) + shelf[iSegment - 1][i*2+1];
+-				if (valueFrameBuffer == 0)
+-				{
+-					n_zero_value_drop_frame++;
+-					break;
+-				}
++				n_zero_value_drop_frame++;
++			}
++			for (std::size_t i = range.begin; i < range.end; ++i)
++			{
++				valueFrameBuffer = thermalFrame[i];
+ 
+ 				if (!autoRangeMin && (valueFrameBuffer <= minValue))
+ 				{
+@@ -265,13 +278,10 @@ try
+ 				int ofs_g = 3 * value + 1; if (selectedColormapSize <= ofs_g) ofs_g = selectedColormapSize - 1;
+ 				int ofs_b = 3 * value + 2; if (selectedColormapSize <= ofs_b) ofs_b = selectedColormapSize - 1;
+ 				cv::Vec3b color(selectedColormap[ofs_b], selectedColormap[ofs_g], selectedColormap[ofs_r]);
+-                column = (i % PACKET_SIZE_UINT16) - 2 + (myImageWidth / 2) * ((i % (PACKET_SIZE_UINT16 * 2)) / PACKET_SIZE_UINT16);
+-                row = i / PACKET_SIZE_UINT16 / 2 + ofsRow;
+-                if (row < myImageHeight && column < myImageWidth)
+-				{
+-                    image.at<cv::Vec3b>(row, column) = color;
+-					gray.at<uint8_t>(row, column) = value;
+-                }
++                column = i % myImageWidth;
++                row = i / myImageWidth;
++                image.at<cv::Vec3b>(row, column) = color;
++				gray.at<uint8_t>(row, column) = value;
+                 if ((column == 80) && (row == 60))
+ 				{
+                     double temp = (valueFrameBuffer / 100) - 273;
+diff --git a/stream/lepton.cpp b/stream/lepton.cpp
+index 72b9731..41e0700 100644
+--- a/stream/lepton.cpp
++++ b/stream/lepton.cpp
+@@ -8,6 +8,9 @@
+ #include <arpa/inet.h>
+ #include <unistd.h>
+ #include <opencv2/opencv.hpp>
++#include <array>
++#include <vector>
++#include <ThermalFrameAssembler.h>
+ #include <Palettes.h>
+ 
+ #define PACKET_SIZE 164
+@@ -125,8 +128,9 @@ int main(int argc, char **argv)
+ 		}
+ 	}
+ 
+-	uint8_t result[PACKET_SIZE * PACKETS_PER_FRAME];
+-	uint8_t shelf[4][PACKET_SIZE * PACKETS_PER_FRAME];
++	thermal_stream::ThermalFrameAssembler thermalAssembler;
++	std::array<uint8_t, thermal_stream::ThermalFrameAssembler::kDatagramBytes + 1> datagram;
++	std::vector<uint16_t> thermalFrame;
+ 	uint16_t minValue = rangeMin;
+ 	uint16_t maxValue = rangeMax;
+ 	float diff = maxValue - minValue;
+@@ -162,18 +166,22 @@ int main(int argc, char **argv)
+ 
+     while (true)
+ 	{
+-        for (int i = 0; i < 4; ++i)
++        bool thermalFrameComplete = false;
++        while (!thermalFrameComplete)
+ 		{
+-            ssize_t received_bytes = recvfrom(sockfd, shelf[i], sizeof(shelf[i]), 0, (struct sockaddr *)&cliaddr, &len);
++            ssize_t received_bytes = recvfrom(sockfd, datagram.data(), datagram.size(), 0, (struct sockaddr *)&cliaddr, &len);
+             if (received_bytes < 0)
+ 			{
+                 std::cerr << "Receive failed" << std::endl;
+                 close(sockfd);
+                 return -1;
+             }
++			thermalFrameComplete = thermalAssembler.add_datagram(
++				datagram.data(), static_cast<std::size_t>(received_bytes), thermalFrame) ==
++				thermal_stream::ThermalFrameAssembler::Result::Complete;
+         }
+ 
+-        if (autoRangeMin || autoRangeMax)
++		if (autoRangeMin || autoRangeMax)
+ 		{
+ 			if (autoRangeMin)
+ 			{
+@@ -183,28 +191,20 @@ int main(int argc, char **argv)
+ 			{
+ 				maxValue = 0;
+ 			}
+-			for (int iSegment = 1; iSegment <= 4; iSegment++)
++			for (std::size_t i = 0; i < thermalFrame.size(); ++i)
+ 			{
+-				for (int i = 0;i < FRAME_SIZE_UINT16; i++)
++				uint16_t value = thermalFrame[i];
++				if (value == 0)
+ 				{
+-					if (i % PACKET_SIZE_UINT16 < 2)
+-					{
+-						continue;
+-					}
+-
+-					uint16_t value = (shelf[iSegment - 1][i * 2] << 8) + shelf[iSegment - 1][i * 2+1];
+-					if (value == 0)
+-					{
+-						continue;
+-					}
+-					if (autoRangeMax && (value > maxValue))
+-					{
+-						maxValue = value;
+-					}
+-					if (autoRangeMin && (value < minValue))
+-					{
+-						minValue = value;
+-					}
++					continue;
++				}
++				if (autoRangeMax && (value > maxValue))
++				{
++					maxValue = value;
++				}
++				if (autoRangeMin && (value < minValue))
++				{
++					minValue = value;
+ 				}
+ 			}
+ 			diff = maxValue - minValue;
+@@ -214,22 +214,20 @@ int main(int argc, char **argv)
+ 		int row, column;
+ 		uint16_t value;
+ 		uint16_t valueFrameBuffer;
+-		for (int iSegment = 1; iSegment <= 4; iSegment++)
++		const auto renderRanges = thermal_stream::renderable_pixel_ranges(thermalFrame);
++		for (std::size_t segment = 0; segment < renderRanges.size(); ++segment)
+ 		{
+-			int ofsRow = 30 * (iSegment - 1);
+-			for (int i = 0;i < FRAME_SIZE_UINT16; i++)
++			const auto &range = renderRanges[segment];
++			const std::size_t segmentEnd = segment + 1 < renderRanges.size()
++				? renderRanges[segment + 1].begin
++				: thermalFrame.size();
++			if (range.end < segmentEnd)
+ 			{
+-				if (i % PACKET_SIZE_UINT16 < 2)
+-				{
+-					continue;
+-				}
+-
+-				valueFrameBuffer = (shelf[iSegment - 1][i * 2] << 8) + shelf[iSegment - 1][i * 2+1];
+-				if (valueFrameBuffer == 0)
+-				{
+-					n_zero_value_drop_frame++;
+-					break;
+-				}
++				n_zero_value_drop_frame++;
++			}
++			for (std::size_t i = range.begin; i < range.end; ++i)
++			{
++				valueFrameBuffer = thermalFrame[i];
+ 
+ 				if (!autoRangeMin && (valueFrameBuffer <= minValue))
+ 				{
+@@ -237,7 +235,7 @@ int main(int argc, char **argv)
+ 				}
+ 				else if (!autoRangeMax && (valueFrameBuffer > maxValue))
+ 				{
+-					value = ((maxValue - minValue) * scale);
++					value = 255;
+ 				}
+ 				else
+ 				{
+@@ -247,13 +245,10 @@ int main(int argc, char **argv)
+ 				int ofs_g = 3 * value + 1; if (selectedColormapSize <= ofs_g) ofs_g = selectedColormapSize - 1;
+ 				int ofs_b = 3 * value + 2; if (selectedColormapSize <= ofs_b) ofs_b = selectedColormapSize - 1;
+ 				cv::Vec3b color(selectedColormap[ofs_b], selectedColormap[ofs_g], selectedColormap[ofs_r]);
+-                column = (i % PACKET_SIZE_UINT16) - 2 + (myImageWidth / 2) * ((i % (PACKET_SIZE_UINT16 * 2)) / PACKET_SIZE_UINT16);
+-                row = i / PACKET_SIZE_UINT16 / 2 + ofsRow;
+-                if (row < myImageHeight && column < myImageWidth)
+-				{
+-                    image.at<cv::Vec3b>(row, column) = color;
+-					gray.at<uint8_t>(row, column) = value;
+-                }
++                column = i % myImageWidth;
++                row = i / myImageWidth;
++                image.at<cv::Vec3b>(row, column) = color;
++				gray.at<uint8_t>(row, column) = value;
+                 if ((column == 80) && (row == 60))
+ 				{
+                     double temp = (valueFrameBuffer / 100) - 273;

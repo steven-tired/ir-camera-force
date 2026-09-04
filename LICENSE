@@ -220,17 +220,17 @@
 SCOPE
 
 The license above covers the work original to this repository: ir_force/,
-experiments/, tests/, scripts/, docs/, calibration/flir_oak/,
-calibration/realsense_lepton/, and the top-level protocol and documentation
-files.
+experiments/, tests/, scripts/, docs/, calibration/, and the top-level
+protocol and documentation files. That includes
+calibration/thermal_project/additions/, which is this project's own code even
+though it is laid out against another project's tree.
 
-It does NOT cover third-party code carried in-tree at a recorded upstream
-commit, which keeps whatever license its upstream gives it:
+It does NOT cover the three vendored trees under hardware/, which are
+third-party code carried at a recorded upstream commit and keep whatever
+license their upstream gives them:
 
     hardware/flirone-v4l2/                    GPL-2.0
     hardware/flirone-v4l2-radiometric-audit/  GPL-2.0
     hardware/lepton/                          BSD-3-Clause
-    calibration/thermal_project/              no upstream license
 
-See THIRD_PARTY_NOTICES.md, and each hardware/ tree's own LICENSE and
-UPSTREAM.md.
+See THIRD_PARTY_NOTICES.md, and each tree's own LICENSE and UPSTREAM.md.
