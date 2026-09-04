@@ -168,7 +168,7 @@ The live raw files are intentionally Git-ignored as camera data. This report and
 The original `tools/flirone-v4l2` worktree was not modified by this audit. This prototype lives only in the separate worktree and branch. To discard it later, from the original repository:
 
 ```bash
-git worktree remove /home/zhuokai/hand-teleop/ir-camera-force/hardware/flirone-v4l2-radiometric-audit
+git worktree remove hardware/flirone-v4l2-radiometric-audit
 git branch -D codex/flir-radiometric-feasibility
 ```
 

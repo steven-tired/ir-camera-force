@@ -16,7 +16,7 @@ before calibration or a soak:
 
 ```bash
 sudo modprobe v4l2loopback video_nr=20,21 card_label=FLIR_ONE_VISIBLE,FLIR_ONE_THERMAL exclusive_caps=1,1
-cd /home/zhuokai/hand-teleop/ir-camera-force/hardware/flirone-v4l2
+cd hardware/flirone-v4l2
 sudo ./flirone palettes/Iron2.raw
 ```
 
@@ -26,11 +26,11 @@ intensity, not radiometric temperature.
 Run guided OAK-to-FLIR calibration:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   calibrate_oak_flir_hand_pressure.py \
   --thermal /dev/video21 \
-  --out-dir /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam/calibration
+  --out-dir $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam/calibration
 ```
 
 Move a warm fingertip across the shared OAK/FLIR view at multiple image
@@ -80,28 +80,28 @@ shadow mode.
 Run this short robot-free smoke test first:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python ir_pressure_soak.py \
+cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python ir_pressure_soak.py \
   --duration-s 10 \
   --max-oak-stall-ms 500 \
   --min-cycles 0 \
   --thermal /dev/video21 \
-  --calibration /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam/calibration/oak_flir_hand_pressure_projection.json \
-  --sidecar /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_hand_pressure_viability/gate1_smoke.csv
+  --calibration $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam/calibration/oak_flir_hand_pressure_projection.json \
+  --sidecar local/datasets/ir_hand_pressure_viability/gate1_smoke.csv
 ```
 
 The full Gate 1 command is exactly 1800 seconds and requires at least 100
 complete open/close/open cycles:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python ir_pressure_soak.py \
+cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python ir_pressure_soak.py \
   --duration-s 1800 \
   --max-oak-stall-ms 500 \
   --min-cycles 100 \
   --thermal /dev/video21 \
-  --calibration /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam/calibration/oak_flir_hand_pressure_projection.json \
-  --sidecar /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_hand_pressure_viability/gate1_1800s_100cycles.csv
+  --calibration $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam/calibration/oak_flir_hand_pressure_projection.json \
+  --sidecar local/datasets/ir_hand_pressure_viability/gate1_1800s_100cycles.csv
 ```
 
 During Gate 1, perform and record these manual injections:

@@ -221,8 +221,8 @@ attempt_index)` keys, skipped/reordered slots, nonconsecutive attempts, label
 mismatches, and cross-slot exhaustion of either label's reserve budget:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   validate_ir_hand_pinch_session_ledger.py \
   --ledger SESSION_LEDGER.json \
   --schema ir_hand_pinch_session_ledger.schema.json \

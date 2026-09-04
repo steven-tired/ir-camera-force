@@ -37,10 +37,10 @@ Close any other OAK preview first, then use the live layout tool before a
 preflight capture:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
 
 env -u PYTHONPATH QT_QPA_PLATFORM=xcb \
-  /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+  $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   view_ir_foam_setup.py
 ```
 
@@ -68,7 +68,7 @@ and thermal ROIs using the live preview. The numbers are only starting values;
 they are not valid until the saved images show the actual setup correctly.
 
 ```bash
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   record_ir_foam_compression_experiment.py \
   --session-id S01 --participant-id ZK --object-id foam --rep auto --recording-index 1 \
   --thermal-foam-bbox 68,40,28,30 \
@@ -94,7 +94,7 @@ RGB because that stream does not preserve a sufficiently bright white surround
 around the dots.
 
 It saves these files under
-`/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_foam_compression/preflight/`:
+`local/datasets/ir_foam_compression/preflight/`:
 
 - `thermal.png`: frozen thermal analysis areas.
 - `oak_rgb.png` and `oak_markers.png`: marker visibility and detection.
@@ -118,7 +118,7 @@ thermal baseline and marker distance have recovered, and recalibrate `d0`
 before each one. Leave hand-geometry tracking enabled for formal data.
 
 ```bash
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   record_ir_foam_compression_experiment.py \
   --session-id S01 --participant-id ZK --object-id foam --rep auto --recording-index 1 \
   --thermal-foam-bbox 68,40,28,30 \
@@ -167,9 +167,9 @@ events under `datasets/ir_foam_compression/trials/<trial-id>/`.
 Analyze one completed trial with:
 
 ```bash
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   analyze_ir_foam_compression.py \
-  --trial /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_foam_compression/trials/foam-compression_s01_foam_zk_rep01
+  --trial local/datasets/ir_foam_compression/trials/foam-compression_s01_foam_zk_rep01
 ```
 
 The pre-registered primary outcome is `foam_center_norm`: the median palette

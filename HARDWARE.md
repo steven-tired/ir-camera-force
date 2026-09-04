@@ -54,9 +54,9 @@ Saved to `~/.cache/huggingface/lerobot/calibration/robots/so_follower/so101_foll
     VIRTUAL_ENV=.venv-lerobot uv pip install "cmeel-urdfdom==4.0.1" "cmeel-tinyxml2==10.0.0"
     ```
 - **URDF_PATH** (SO-ARM100 clone, not committed to this repo — clone fresh, ~depth 1):
-  `/home/zhuokai/hand-teleop/SO-ARM100/Simulation/SO101/so101_new_calib.urdf`
+  `$WORKSPACE_ROOT/SO-ARM100/Simulation/SO101/so101_new_calib.urdf`
   ```bash
-  cd /home/zhuokai/hand-teleop
+  cd $WORKSPACE_ROOT
   git clone --depth 1 https://github.com/TheRobotStudio/SO-ARM100.git
   ```
 - **target_frame_name = `gripper_frame_link`** — found and worked on the first try, no fallback needed.
@@ -71,7 +71,7 @@ Saved to `~/.cache/huggingface/lerobot/calibration/robots/so_follower/so101_foll
 
 - Experiment plan: `docs/superpowers/plans/2026-07-06-ir-grip-force-viability-experiment.md`
 - Operator runbook: `IR_GRIP_FORCE_EXPERIMENT.md`
-- Dataset root: `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability`
+- Dataset root: `local/datasets/ir_grip_force_viability`
 - Historical device enumeration above listed the workspace camera as
   `/dev/video2`, but do not use `/dev/video2` for this experiment.
 - Before the first IR run, list the stable symlinks with:
@@ -104,8 +104,8 @@ Saved to `~/.cache/huggingface/lerobot/calibration/robots/so_follower/so101_foll
   `--allow-thermal-mismatch` only for deliberate overrides.
 - If palette reconstruction is available during feature extraction, use:
   ```bash
-  env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python extract_ir_grip_features.py \
-    --root /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability \
+  env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python extract_ir_grip_features.py \
+    --root local/datasets/ir_grip_force_viability \
     --baseline-frames 20 \
     --palette /tmp/flirone-v4l2/palettes/Iron2.raw \
     --invert-palette

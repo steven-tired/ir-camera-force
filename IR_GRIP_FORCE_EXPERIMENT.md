@@ -36,15 +36,15 @@ fixed low/med/high foam trials.
 
 Latest hard-block moving-window result files:
 
-- `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/hard_sweep_rep02_rep03_rep04_goal30_to25_moving_mean_delta_vs_load.png`
-- `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/hard_sweep_rep02_rep03_rep04_goal30_to25_moving_mean_delta_vs_load.csv`
-- `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/hard_sweep_rep02_rep03_rep04_goal30_to25_moving_mean_delta_vs_load_summary.csv`
+- `local/datasets/ir_grip_force_viability/hard_sweep_rep02_rep03_rep04_goal30_to25_moving_mean_delta_vs_load.png`
+- `local/datasets/ir_grip_force_viability/hard_sweep_rep02_rep03_rep04_goal30_to25_moving_mean_delta_vs_load.csv`
+- `local/datasets/ir_grip_force_viability/hard_sweep_rep02_rep03_rep04_goal30_to25_moving_mean_delta_vs_load_summary.csv`
 
 Soft-object result files:
 
-- `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/sweep_ir_load_analysis.csv`
-- `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/sweep_ir_load_analysis.png`
-- `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/soft_sweep_ir_load_summary.csv`
+- `local/datasets/ir_grip_force_viability/sweep_ir_load_analysis.csv`
+- `local/datasets/ir_grip_force_viability/sweep_ir_load_analysis.png`
+- `local/datasets/ir_grip_force_viability/soft_sweep_ir_load_summary.csv`
 
 These soft-object artifacts are retained as a negative/low-signal result rather
 than as missing data.
@@ -65,7 +65,7 @@ for control.
 
 ## Outputs
 
-- Dataset root: `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability`
+- Dataset root: `local/datasets/ir_grip_force_viability`
 - Per trial:
   - `metadata.json`
   - `telemetry.csv`
@@ -108,7 +108,7 @@ the measurement.
 Important bridge state from 2026-07-06:
 
 - The persistent working bridge is
-  `/home/zhuokai/hand-teleop/ir-camera-force/hardware/flirone-v4l2`, remote
+  `hardware/flirone-v4l2`, remote
   `https://github.com/fnoop/flirone-v4l2.git`.
 - The checked-out upstream bridge is too old for this FLIR ONE thermal payload.
   This camera reports `ThermalSize=10332`, which is a Gen3/Lepton2-style
@@ -133,7 +133,7 @@ sudo modprobe v4l2loopback video_nr=20,21 card_label=FLIR_ONE_VISIBLE,FLIR_ONE_T
 Start `flirone-v4l2` with the Iron2 palette:
 
 ```bash
-cd /home/zhuokai/hand-teleop/ir-camera-force/hardware/flirone-v4l2
+cd hardware/flirone-v4l2
 sudo ./flirone palettes/Iron2.raw
 ```
 
@@ -170,11 +170,11 @@ camera path into `BIRD_PATH`. Do not use historical OpenCV enumeration such as
 `/dev/video2` for this experiment.
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
 ls -l /dev/v4l/by-id/
 BIRD_PATH=/dev/v4l/by-id/<paste-the-workspace-camera-video-index0-symlink>
 test -e "$BIRD_PATH"
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python verify_ir_grip_setup.py \
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python verify_ir_grip_setup.py \
   --bird "$BIRD_PATH" \
   --thermal /dev/video21 \
   --flir-visible /dev/video20
@@ -190,20 +190,20 @@ Pass condition:
   hatches for deliberate overrides only
 - `setup_check/bird.png`, `setup_check/thermal.png`, and
   `setup_check/flir_visible.png` are written under
-  `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/setup_check/`
+  `local/datasets/ir_grip_force_viability/setup_check/`
 
 ## Step 2: Choose low/med/high gripper targets
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python characterize_ir_grip_current.py \
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python characterize_ir_grip_current.py \
   --targets 90,80,70,60,50,40 \
   --min-current-gap 10
 ```
 
 Pass condition:
 
-- `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/grip_targets.json`
+- `local/datasets/ir_grip_force_viability/grip_targets.json`
   contains `selected_targets.low`, `selected_targets.med`, and
   `selected_targets.high`
 - Optional extra probe: `selected_targets.xhigh` may be set manually to `10.0`
@@ -222,10 +222,10 @@ contact patch and can make stronger grip levels look smaller than weaker grip
 levels.
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
 BIRD_PATH=/dev/v4l/by-id/<paste-the-workspace-camera-video-index0-symlink>
 test -e "$BIRD_PATH"
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python record_ir_grip_trial.py \
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python record_ir_grip_trial.py \
   --object hard-block \
   --hardness solid \
   --grip-level low \
@@ -238,7 +238,7 @@ env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python record_ir_g
 Pass condition:
 
 - Trial folder exists under
-  `/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/trials/`
+  `local/datasets/ir_grip_force_viability/trials/`
 - It contains `metadata.json`, `telemetry.csv`, `thermal/*.png`, and `bird/*.png`
 
 ## Step 4: Record the passive trial matrix
@@ -282,10 +282,10 @@ This avoids the bad baseline seen when the gripper moved during baseline, and it
 avoids overloading the hard block at target `10`.
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
 BIRD_PATH=/dev/v4l/by-id/<paste-the-workspace-camera-video-index0-symlink>
 test -e "$BIRD_PATH"
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python record_ir_grip_sweep.py \
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python record_ir_grip_sweep.py \
   --object hard-block-passive-jaw-fixtured \
   --hardness solid \
   --rep 5 \
@@ -312,10 +312,10 @@ The confirmation prompt is case-sensitive; type exactly `YES`.
 Warm one object enough that the thermal patch is visually obvious, then run:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
 BIRD_PATH=/dev/v4l/by-id/<paste-the-workspace-camera-video-index0-symlink>
 test -e "$BIRD_PATH"
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python record_ir_grip_trial.py \
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python record_ir_grip_trial.py \
   --object wood-block \
   --hardness solid \
   --grip-level high \
@@ -334,23 +334,23 @@ grip-force or hardness claims.
 Recommended extraction when the `flirone-v4l2` palette file is available:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python extract_ir_grip_features.py \
-  --root /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability \
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python extract_ir_grip_features.py \
+  --root local/datasets/ir_grip_force_viability \
   --baseline-frames 20 \
-  --palette /home/zhuokai/hand-teleop/ir-camera-force/hardware/flirone-v4l2/palettes/Iron2.raw \
+  --palette hardware/flirone-v4l2/palettes/Iron2.raw \
   --invert-palette
 ```
 
 Current hard-block ROI extraction:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python extract_ir_grip_features.py \
-  --root /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability \
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python extract_ir_grip_features.py \
+  --root local/datasets/ir_grip_force_viability \
   --trial-glob 'hard-block-passive-jaw-fixtured_solid_sweep_rep*' \
   --baseline-frames 20 \
-  --palette /home/zhuokai/hand-teleop/ir-camera-force/hardware/flirone-v4l2/palettes/Iron2.raw \
+  --palette hardware/flirone-v4l2/palettes/Iron2.raw \
   --invert-palette \
   --thermal-roi 25,35,115,80 \
   --feature-name ir_features_hard_roi.csv \
@@ -364,9 +364,9 @@ camera-framing artifacts, but should be rechecked if the camera mount changes.
 Fallback extraction without palette reconstruction:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python extract_ir_grip_features.py \
-  --root /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability \
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python extract_ir_grip_features.py \
+  --root local/datasets/ir_grip_force_viability \
   --baseline-frames 20
 ```
 
@@ -380,9 +380,9 @@ Pass condition:
 For a readable one-trial review, generate a smoke report:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python report_ir_grip_trial.py \
-  /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/trials/hard-block_solid_low_rep01
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python report_ir_grip_trial.py \
+  local/datasets/ir_grip_force_viability/trials/hard-block_solid_low_rep01
 ```
 
 This writes:
@@ -407,9 +407,9 @@ matrix decision gate. It is not the best evaluator for the continuous sweep
 pilot.
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python analyze_ir_grip_experiment.py \
-  --root /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python analyze_ir_grip_experiment.py \
+  --root local/datasets/ir_grip_force_viability
 ```
 
 Actual decision logic in the current analyzer:
@@ -433,8 +433,8 @@ These checks are safe to run without moving hardware beyond each script's
 `--help`:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python -m pytest \
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python -m pytest \
   tests/test_ir_devices.py \
   tests/test_ir_dataset.py \
   tests/test_ir_robot.py \
@@ -445,10 +445,10 @@ env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python -m pytest \
 ```
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python verify_ir_grip_setup.py --help
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python characterize_ir_grip_current.py --help
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python record_ir_grip_trial.py --help
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python extract_ir_grip_features.py --help
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python analyze_ir_grip_experiment.py --help
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python verify_ir_grip_setup.py --help
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python characterize_ir_grip_current.py --help
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python record_ir_grip_trial.py --help
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python extract_ir_grip_features.py --help
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python analyze_ir_grip_experiment.py --help
 ```

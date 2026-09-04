@@ -17,9 +17,9 @@ number when retrying; never reuse a prior run directory.
 
 ```bash
 set -euo pipefail
-BASE=/home/zhuokai/hand-teleop/thermal-project
-VERIFIER_WT=/home/zhuokai/hand-teleop/thermal-project-calibration
-ROOT=/home/zhuokai/hand-teleop/thermal-project-calibration-runs
+BASE=$WORKSPACE_ROOT/thermal-project
+VERIFIER_WT=$WORKSPACE_ROOT/thermal-project-calibration
+ROOT=$WORKSPACE_ROOT/thermal-project-calibration-runs
 BASE_COMMIT=74268ab369904935c5b46fd13a14a0f34814bf4b
 VERIFIER_COMMIT=3d5352c33770db6f3ed36e70d0ba0c489d9d2f4c
 test -z "$(git -C "$VERIFIER_WT" status --porcelain)"
@@ -125,21 +125,21 @@ project repeatability choice, not a claim from the author repository.
 
 ## 3. Start the sanctioned Pi stream and verify visibility
 
-Only use the C++ path in `/home/zhuokai/hand-teleop/docs/LEPTON_PI_HOWTO.md`.
+Only use the C++ path in `$WORKSPACE_ROOT/docs/LEPTON_PI_HOWTO.md`.
 Python `spidev` probes are prohibited.
 
 ```bash
 PI_BINARY_SHA256=4fd0fc67e99a268210b2bf3e09a814ce78a871e316695ac8ced5d31dd0d1760a
 ACTUAL_PI_SHA256="$(ssh anujn@192.168.50.2 \
-  "sha256sum /home/anujn/Project/LeptonModule/software/build/raspberrypi_video_network | awk '{print \$1}'")"
+  "sha256sum $LEPTON_PI_BIN | awk '{print \$1}'")"
 test "$ACTUAL_PI_SHA256" = "$PI_BINARY_SHA256"
 printf '%s  %s\n' "$ACTUAL_PI_SHA256" \
-  /home/anujn/Project/LeptonModule/software/build/raspberrypi_video_network \
+  $LEPTON_PI_BIN \
   >"$RUN/provenance/pi-binary.sha256"
 sha256sum "$RUN/provenance"/* >"$RUN/manifests/provenance.sha256"
 
-/home/zhuokai/hand-teleop/scripts/run_lepton_stream.sh start
-/home/zhuokai/hand-teleop/scripts/run_lepton_stream.sh status
+$WORKSPACE_ROOT/scripts/run_lepton_stream.sh start
+$WORKSPACE_ROOT/scripts/run_lepton_stream.sh status
 ```
 
 The sanctioned helper leaves the official C++ streamer running on the Pi and
@@ -155,7 +155,7 @@ ssh anujn@192.168.50.2 \
 In a third laptop terminal, keep the viewer open through the FFC transition:
 
 ```bash
-cd /home/zhuokai/hand-teleop
+cd $WORKSPACE_ROOT
 env -u PYTHONPATH .venv-lerobot/bin/python \
   webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam/view_ir_camera.py \
   --lepton-udp 8080

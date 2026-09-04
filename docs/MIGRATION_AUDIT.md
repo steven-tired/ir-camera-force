@@ -1,4 +1,4 @@
-# Private repository migration audit
+# Repository migration audit
 
 Run 2026-09-01, at `4c0beea`, after Tasks 1–6.
 

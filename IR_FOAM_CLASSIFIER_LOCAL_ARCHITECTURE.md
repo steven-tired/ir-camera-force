@@ -20,11 +20,11 @@ placements, or foam pieces.
 
 ## Relevant Workspace Structure
 
-/home/zhuokai/hand-teleop is a meta-workspace, not a Git repository itself.
+$WORKSPACE_ROOT is a meta-workspace, not a Git repository itself.
 The active implementation is the nested repository below.
 
 ~~~text
-/home/zhuokai/hand-teleop/
+$WORKSPACE_ROOT/
 ├── project.md
 ├── tools/flirone-v4l2/
 │   └── palettes/Iron2.raw                 # FLIR RGB palette
@@ -326,10 +326,10 @@ compression as a correct label.
 Primary command:
 
 ~~~bash
-cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+cd $WORKSPACE_ROOT/webcam-input/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   analyze_ir_foam_compression.py \
-  --trial /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_foam_compression/trials/foam-compression_foam-20260715retry2_foam_zhuokai_rep08
+  --trial local/datasets/ir_foam_compression/trials/foam-compression_foam-20260715retry2_foam_zhuokai_rep08
 ~~~
 
 The analysis is restricted before examining results:

@@ -420,12 +420,12 @@ The setup photo is optional. If the supplied path does not exist, capture
 continues and records `surface_photo=null` rather than fabricating an image:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   lerobot_teleoperator_so101_webcam/capture_single_finger_curve.py \
-  --session-dir /home/zhuokai/hand-teleop/scratch_lepton/single_finger_surface_press_curve_01 \
+  --session-dir $WORKSPACE_ROOT/scratch_lepton/single_finger_surface_press_curve_01 \
   --surface-material "rigid matte plastic" \
-  --surface-photo /home/zhuokai/hand-teleop/scratch_lepton/single_finger_surface_setup.jpg \
+  --surface-photo $WORKSPACE_ROOT/scratch_lepton/single_finger_surface_setup.jpg \
   --preview \
   --manual-ffc
 ```
@@ -439,11 +439,11 @@ contrast for communication only.
 After capture:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop
+cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop
 MPLCONFIGDIR=/tmp/single-finger-mpl \
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   lerobot_teleoperator_so101_webcam/analyze_single_finger_curve.py \
-  --session-dir /home/zhuokai/hand-teleop/scratch_lepton/single_finger_surface_press_curve_01
+  --session-dir $WORKSPACE_ROOT/scratch_lepton/single_finger_surface_press_curve_01
 ```
 
 Current boundary:
@@ -557,11 +557,11 @@ steadier until READY shows a thermal width in the 10--15 px range.
 Run the v2 analyzer after a new capture:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop
+cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop
 MPLCONFIGDIR=/tmp/single-finger-mpl \
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   lerobot_teleoperator_so101_webcam/analyze_single_finger_thermal_tracking.py \
-  --session-dir /home/zhuokai/hand-teleop/scratch_lepton/<new-session>
+  --session-dir $WORKSPACE_ROOT/scratch_lepton/<new-session>
 ```
 
 Final v2 evidence hashes:
@@ -784,10 +784,10 @@ physical validation and do not bundle them into the hand-shadow MVP commit.
 **Immediate:** run the v2 A-B-A press check on the taped spot:
 
 ```bash
-cd /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   lerobot_teleoperator_so101_webcam/capture_single_finger_hold_check.py \
-  --session-dir /home/zhuokai/hand-teleop/scratch_lepton/single_finger_hold_check_02 \
+  --session-dir $WORKSPACE_ROOT/scratch_lepton/single_finger_hold_check_02 \
   --surface-material "black electrical tape on desk" \
   --rounds 3 \
   --manual-ffc
@@ -1105,7 +1105,7 @@ Commit **`d78531c`** on `ir-hand-pressure-so101-teleop` — 13 files, 475 tests 
 All software upstream of a real thermal frame is built. Run tests with:
 ```
 cd webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python -m pytest tests/ -q
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python -m pytest tests/ -q
 ```
 (Package `__init__` imports lerobot, so tests need **`.venv-lerobot`**, not `.venv-webcam`.)
 
@@ -1255,7 +1255,7 @@ run any python `spidev` probe / `run_lepton_stream.sh probe`** (iron rule — se
 # Pi side (foreground so you see its log):
 ssh anujn@192.168.50.2 '~/Project/LeptonModule/software/build/raspberrypi_video_network -net 192.168.50.1 -port 8080'
 # Laptop side (worktree copy has --lepton-udp; needs .venv-lerobot, the package imports lerobot):
-cd /home/zhuokai/hand-teleop
+cd $WORKSPACE_ROOT
 env -u PYTHONPATH .venv-lerobot/bin/python \
   webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam/view_ir_camera.py \
   --lepton-udp 8080
@@ -1267,12 +1267,12 @@ release. Note raw-count min/med/max from the viewer overlay.
 
 ### Step B — Phase 2 hard/light trials (THE decisive physics gate)
 ```
-cd /home/zhuokai/hand-teleop/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH /home/zhuokai/hand-teleop/.venv-lerobot/bin/python \
+cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   record_ir_hand_pressure_trial.py --lepton-udp 8080 --surface skin \
   --contact hard_pinch --rep N \
   --bird /dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i-video-index0 \
-  --root /home/zhuokai/hand-teleop/ir-camera-force/local/datasets/lepton_hard_pinch
+  --root local/datasets/lepton_hard_pinch
 # ...and --contact light_pinch, plus confusers (near-pinch/rubbing/warm-object)
 ```
 The first setup trial, `hand-pressure_skin_hard-pinch_sweep_rep01`, is retained as a rejected

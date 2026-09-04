@@ -62,8 +62,8 @@ paths named, so behaviour on this machine is unchanged.
 
 `tests/test_no_developer_paths_in_published_files.py` enforces it across every
 tracked file except `hardware/`, which is verbatim upstream code. A test that
-needs a file only the rig has must `skip`, not fail — a bare clone runs 1127
-of the 1160 tests and skips 33.
+needs a file only the rig has must `skip`, not fail — a bare clone runs 1129
+of the 1162 tests and skips 33.
 
 The module is `data_paths.py`, not `paths.py`: the public repo owns a
 `paths.py`, and `tests/test_private_namespace_boundary.py` refuses the name.

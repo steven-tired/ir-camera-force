@@ -79,7 +79,7 @@ cleanly: every non-`hand_tracking_*` tree is IR or Lepton.
 
 ### Path rewrites
 
-The migrated experiment programs had hard-coded `/home/zhuokai/hand-teleop/datasets/…`
+The migrated experiment programs had hard-coded `$WORKSPACE_ROOT/datasets/…`
 and `…/tools/flirone-v4l2/palettes/Iron2.raw` defaults, which the move would have
 broken. They now point at this repo's `local/datasets/` and `hardware/flirone-v4l2/`.
 They are still absolute paths — fine while this repo sits inside the old

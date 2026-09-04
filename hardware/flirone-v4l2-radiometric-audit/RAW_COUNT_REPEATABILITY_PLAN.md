@@ -33,8 +33,8 @@ never occlude either raw ROI or move the target.
 All run data is stored outside this source repository:
 
 ```bash
-export SESSION_ROOT=/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_raw_repeatability/session-YYYYMMDD
-cd /home/zhuokai/hand-teleop/ir-camera-force/hardware/flirone-v4l2-radiometric-audit
+export SESSION_ROOT=local/datasets/ir_raw_repeatability/session-YYYYMMDD
+cd hardware/flirone-v4l2-radiometric-audit
 ```
 
 The recorder creates `runs/<run-id>/` with:

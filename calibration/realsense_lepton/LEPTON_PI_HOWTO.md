@@ -76,7 +76,7 @@ ssh anujn@192.168.50.2
 
 **笔记本侧 —— 项目自带接收端(注意是 worktree 那份,才有 --lepton-udp):**
 ```bash
-cd /home/zhuokai/hand-teleop
+cd $WORKSPACE_ROOT
 env -u PYTHONPATH .venv-lerobot/bin/python \
   webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam/view_ir_camera.py \
   --lepton-udp 8080
@@ -84,7 +84,7 @@ env -u PYTHONPATH .venv-lerobot/bin/python \
 
 **便捷等价(脚本替你 ssh 起 C++ streamer):**
 ```bash
-cd /home/zhuokai/hand-teleop
+cd $WORKSPACE_ROOT
 ./scripts/run_lepton_stream.sh start     # ssh 起官方 streamer
 ./scripts/run_lepton_stream.sh status    # 确认 raspberrypi_video_network 在跑
 ./scripts/run_lepton_stream.sh stop      # 停
@@ -141,7 +141,7 @@ ssh anujn@192.168.50.2 'sudo shutdown -h now'
 2. `ssh anujn@192.168.50.2 'sudo reboot'`,**等满 60s 开完**再起 streamer(重启清掉卡住的 spidev)。
 3. 起 streamer 前确保没有旧 streamer 占 SPI。优先在笔记本运行
    `./scripts/run_lepton_stream.sh stop`;若必须在 Pi 上操作,使用锚定全路径的
-   `pkill -f '^/home/anujn/Project/LeptonModule/software/build/raspberrypi_video_network( |$)'`。
+   `pkill -f '^$LEPTON_PI_BIN( |$)'`。
 
 Phase 1 streamer 会先保持 CS idle 200 ms 做 VoSPI 软重同步；只有连续 5 次软重同步失败
 才尝试 camera reboot。若需回滚，2026-07-21 前的 binary 保存在 Pi：
