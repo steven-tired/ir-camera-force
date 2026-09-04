@@ -19,11 +19,11 @@ FROZEN_XML = (
     / "extrinsic_refined.xml"
 )
 
-#: These two tests read the frozen extrinsic produced by the calibration rig.
-#: It is not carried in this repository (see docs/CALIBRATION_PROVENANCE.md), so
-#: a clone without IR_FORCE_CALIBRATION_RUNS set skips them rather than failing
-#: on a path only the recording machine has.
-pytestmark = pytest.mark.skipif(
+#: The frozen extrinsic is produced by the calibration rig and is not carried
+#: in this repository (see docs/CALIBRATION_PROVENANCE.md). Only the tests that
+#: actually read it are guarded — a module-level skip would take the pure
+#: geometry tests with it, which need no rig at all.
+requires_frozen_extrinsic = pytest.mark.skipif(
     not FROZEN_XML.exists(),
     reason=f"frozen calibration extrinsic not present at {FROZEN_XML}",
 )
@@ -75,6 +75,7 @@ def projection_inputs():
     }
 
 
+@requires_frozen_extrinsic
 def test_loads_only_the_frozen_thermal_to_color_geometry():
     R_tc, T_tc, thermal_K, thermal_D = load_frozen_thermal_geometry(FROZEN_XML)
 
@@ -86,6 +87,7 @@ def test_loads_only_the_frozen_thermal_to_color_geometry():
     assert np.linalg.det(R_tc) == pytest.approx(1.0, abs=1e-9)
 
 
+@requires_frozen_extrinsic
 def test_rejects_a_byte_modified_xml_before_parsing(tmp_path):
     modified = tmp_path / "extrinsic_refined.xml"
     modified.write_bytes(FROZEN_XML.read_bytes() + b"\n")
@@ -119,6 +121,7 @@ def test_rejects_invalid_transform_contract(direction, unit, R_edit, message):
         )
 
 
+@requires_frozen_extrinsic
 def test_projects_independent_golden_datum_without_software_flip(projection_inputs):
     result = project_raw_depth_pixel_to_thermal(**projection_inputs)
 
@@ -141,6 +144,7 @@ def test_projects_independent_golden_datum_without_software_flip(projection_inpu
         (500, float("nan")),
     ],
 )
+@requires_frozen_extrinsic
 def test_rejects_invalid_raw_depth_or_scale(projection_inputs, raw_depth, depth_scale_m):
     inputs = {**projection_inputs, "raw_depth": raw_depth, "depth_scale_m": depth_scale_m}
     result = project_raw_depth_pixel_to_thermal(**inputs)
@@ -150,6 +154,7 @@ def test_rejects_invalid_raw_depth_or_scale(projection_inputs, raw_depth, depth_
 
 
 @pytest.mark.parametrize("source_depth_xy", [(-1, 352), (1280, 352)])
+@requires_frozen_extrinsic
 def test_rejects_integer_source_coordinates_outside_native_depth_bounds(
     projection_inputs, source_depth_xy
 ):
@@ -162,6 +167,7 @@ def test_rejects_integer_source_coordinates_outside_native_depth_bounds(
 
 
 @pytest.mark.parametrize("source_depth_xy", [(644.5, 352), (644, 352.5)])
+@requires_frozen_extrinsic
 def test_rejects_noninteger_source_coordinates_before_sdk_geometry(
     projection_inputs, source_depth_xy
 ):
@@ -183,6 +189,7 @@ def test_rejects_noninteger_source_coordinates_before_sdk_geometry(
     assert result.thermal_uv is None
 
 
+@requires_frozen_extrinsic
 def test_rejects_non_brown_depth_model(projection_inputs):
     projection_inputs["depth_intrinsics"].model = rs.distortion.inverse_brown_conrady
     result = project_raw_depth_pixel_to_thermal(**projection_inputs)
@@ -191,6 +198,7 @@ def test_rejects_non_brown_depth_model(projection_inputs):
     assert result.thermal_uv is None
 
 
+@requires_frozen_extrinsic
 def test_rejects_point_behind_thermal_camera(projection_inputs):
     inputs = {
         **projection_inputs,
@@ -203,6 +211,7 @@ def test_rejects_point_behind_thermal_camera(projection_inputs):
     assert result.thermal_uv is None
 
 
+@requires_frozen_extrinsic
 def test_rejects_projection_outside_native_thermal_frame(projection_inputs):
     thermal_K = projection_inputs["thermal_K"].copy()
     thermal_K[0, 2] = 10_000.0
@@ -214,6 +223,7 @@ def test_rejects_projection_outside_native_thermal_frame(projection_inputs):
     assert result.thermal_uv is None
 
 
+@requires_frozen_extrinsic
 def test_projection_is_deterministic(projection_inputs):
     first = project_raw_depth_pixel_to_thermal(**projection_inputs)
     second = project_raw_depth_pixel_to_thermal(**projection_inputs)

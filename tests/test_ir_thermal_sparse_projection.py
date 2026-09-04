@@ -20,11 +20,11 @@ FROZEN_XML = (
     / "extrinsic_refined.xml"
 )
 
-#: These two tests read the frozen extrinsic produced by the calibration rig.
-#: It is not carried in this repository (see docs/CALIBRATION_PROVENANCE.md), so
-#: a clone without IR_FORCE_CALIBRATION_RUNS set skips them rather than failing
-#: on a path only the recording machine has.
-pytestmark = pytest.mark.skipif(
+#: The frozen extrinsic is produced by the calibration rig and is not carried
+#: in this repository (see docs/CALIBRATION_PROVENANCE.md). Only the tests that
+#: actually read it are guarded — a module-level skip would take the pure
+#: geometry tests with it, which need no rig at all.
+requires_frozen_extrinsic = pytest.mark.skipif(
     not FROZEN_XML.exists(),
     reason=f"frozen calibration extrinsic not present at {FROZEN_XML}",
 )
@@ -239,6 +239,7 @@ def test_broken_scalar_success_contract_fails_closed(
         call_sparse([(1, 1, 500)])
 
 
+@requires_frozen_extrinsic
 def test_real_stage1a_golden_sample_maps_to_native_pixel(
     real_projection_inputs,
 ):

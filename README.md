@@ -151,8 +151,13 @@ pip install -e .            # numpy, scipy, opencv-python
 python -m pytest -q         # 1165 tests, no camera or robot required
 ```
 
-`conftest.py` puts the sibling checkout on the path. If it lives somewhere
-else, `export MEDIAPIPE_SO101_DIR=/path/to/mediapipe-so101`.
+`conftest.py` puts the sibling checkout on the path for the tests. If it lives
+somewhere else, `export MEDIAPIPE_SO101_DIR=/path/to/mediapipe-so101`.
+
+Do the editable install before running any program directly — it is what puts
+`ir_force` on the path. The one exception is `experiments/teleop_viz_ee.py`,
+which also needs the sibling checkout and so is launched through
+`scripts/`, never by hand.
 
 ### Where things are written
 
@@ -167,7 +172,7 @@ export IR_FORCE_CALIBRATION_RUNS=/mnt/big/calib-runs # dated calibration runs
 ```
 
 The datasets, the calibration runs and the FLIR/Lepton hardware itself are not
-in this repository. Tests that need them skip; a bare clone runs 1132 of 1165.
+in this repository. Tests that need them skip; a bare clone runs 1147 of 1165.
 
 ### Without any hardware
 
