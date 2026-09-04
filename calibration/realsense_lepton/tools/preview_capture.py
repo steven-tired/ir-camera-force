@@ -7,7 +7,7 @@ BOTH cameras detect the full 4x3 board — so every saved pair is guaranteed bot
 build dir (same layout/naming as depth_saver), continuing after any existing N.
 
 Run (needs .venv-lerobot; Wayland needs xcb):
-  cd /home/zhuokai/hand-teleop
+  cd $WORKSPACE_ROOT
   QT_QPA_PLATFORM=xcb env -u PYTHONPATH \
     PYTHONPATH=webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam \
     .venv-lerobot/bin/python scripts/preview_capture.py \

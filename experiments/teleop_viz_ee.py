@@ -9,8 +9,8 @@ Control lives in the SHARED `WebcamEEController` (same code the recorder uses), 
 recording can't diverge. Runs the robot with use_degrees=True. Keep the e-stop within reach.
 
 Run (stop other camera apps first; default = laptop webcam index 0):
-  cd /home/zhuokai/hand-teleop/webcam-input/lerobot_teleoperator_so101_webcam
-  env -u PYTHONPATH QT_QPA_PLATFORM=xcb /home/zhuokai/hand-teleop/.venv-lerobot/bin/python teleop_viz_ee.py
+  cd $WORKSPACE_ROOT/mediapipe-so101/packages/so101_teleop
+  env -u PYTHONPATH QT_QPA_PLATFORM=xcb $WORKSPACE_ROOT/.venv-lerobot/bin/python teleop_viz_ee.py
 Add --oak to use the OAK-D (clean stereo depth) instead of the monocular webcam.
 
 To RECORD a dataset, use record_so101_ee.py (LeRobot record_loop) -- not this script.

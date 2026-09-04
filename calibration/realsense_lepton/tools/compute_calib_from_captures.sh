@@ -18,8 +18,14 @@
 # Defaults: newest run's stream/build captures, newest verifier worktree.
 set -uo pipefail
 
-ROOT=/home/zhuokai/hand-teleop/thermal-project-calibration-runs
-PY=/home/zhuokai/hand-teleop/.venv-lerobot/bin/python
+# ---- rig locations (override per machine; defaults assume the meta-workspace
+# ---- layout, i.e. this checkout sitting beside thermal-project*) ------------
+_TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CHECKOUT_ROOT="$(cd "$_TOOLS_DIR/../../.." && pwd)"
+WORKSPACE_ROOT="${IR_FORCE_WORKSPACE_ROOT:-$(cd "$CHECKOUT_ROOT/.." && pwd)}"
+
+ROOT="${IR_FORCE_CALIBRATION_RUNS:-$WORKSPACE_ROOT/thermal-project-calibration-runs}"
+PY="${IR_FORCE_PYTHON:-$WORKSPACE_ROOT/.venv-lerobot/bin/python}"
 RS_SERIAL=233522078685
 CAP="${1:-$(ls -dt "$ROOT"/worktrees/*/stream/build 2>/dev/null | head -1)}"
 WT="${2:-$(ls -dt "$ROOT"/worktrees/*/ 2>/dev/null | head -1)}"; WT="${WT%/}"

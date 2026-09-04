@@ -14,6 +14,7 @@ from ir_force.classifier.ir_dataset import (
     ensure_fresh_trial,
     write_hand_pressure_metadata,
 )
+from ir_force.data_paths import dataset_root
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -25,7 +26,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--bird", required=True)
     parser.add_argument("--flir-visible", default="/dev/video20")
     parser.add_argument("--record-flir-visible", action="store_true")
-    parser.add_argument("--root", default="/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_hand_pressure_viability")
+    parser.add_argument("--root", default=str(dataset_root("ir_hand_pressure_viability")))
     parser.add_argument("--fps", type=float, default=10.0)
     parser.add_argument("--baseline-s", type=float, default=2.0)
     parser.add_argument("--press-s", type=float, default=5.0)

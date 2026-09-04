@@ -35,9 +35,10 @@ from ir_force.classifier.ir_hard_classifier import (
     HardClassifierTrialSpec,
     hard_classifier_trial_id,
 )
+from ir_force.data_paths import dataset_root
 
 
-DEFAULT_ROOT = "/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_hard_classifier"
+DEFAULT_ROOT = str(dataset_root("ir_hard_classifier"))
 DEFAULT_TARGET_PERCENTS = "0,25,50,75"
 DEFAULT_THERMAL_ROI = "25,35,115,80"
 

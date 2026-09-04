@@ -20,6 +20,7 @@ _CHECKOUT_ROOT = Path(__file__).resolve().parents[1]
 if str(_CHECKOUT_ROOT) not in sys.path:
     sys.path.insert(0, str(_CHECKOUT_ROOT))
 
+from ir_force.data_paths import calibration_runs_root
 from ir_force.realsense_camera import RealSenseRawProjectorCamera
 from ir_force.ir_capture import LeptonUDPSource
 from ir_force.ir_thermal_projection import (
@@ -31,10 +32,10 @@ from ir_force.ir_thermal_sparse_projection import (
 )
 
 
-FROZEN_XML = Path(
-    "/home/zhuokai/hand-teleop/thermal-project-calibration-runs/worktrees/"
-    "20260724T210232Z-attempt01/calibration/FINAL_flir_brown/"
-    "extrinsic_refined.xml"
+FROZEN_XML = (
+    calibration_runs_root()
+    / "worktrees/20260724T210232Z-attempt01/calibration/FINAL_flir_brown"
+    / "extrinsic_refined.xml"
 )
 STAGE0_RUNTIME_JSON = _CHECKOUT_ROOT / "scratch_lepton/stage0b_runtime_datums.json"
 STAGE0_RUNTIME_SHA256 = (

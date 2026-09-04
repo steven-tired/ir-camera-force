@@ -40,10 +40,11 @@ from ir_force.classifier.ir_foam_compression import (
     StableCompressionGate,
     thermal_frame_hash,
 )
+from ir_force.data_paths import CHECKOUT_ROOT, dataset_root
 
 
-DEFAULT_ROOT = "/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_foam_compression"
-DEFAULT_PALETTE = "/home/zhuokai/hand-teleop/ir-camera-force/hardware/flirone-v4l2/palettes/Iron2.raw"
+DEFAULT_ROOT = str(dataset_root("ir_foam_compression"))
+DEFAULT_PALETTE = str(CHECKOUT_ROOT / "hardware" / "flirone-v4l2" / "palettes" / "Iron2.raw")
 
 
 def _parse_roi(value: str) -> PixelROI:

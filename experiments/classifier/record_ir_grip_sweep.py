@@ -21,6 +21,7 @@ from ir_force.classifier.ir_dataset import (
     ensure_fresh_trial,
     write_metadata,
 )
+from ir_force.data_paths import dataset_root
 from lerobot_teleoperator_so101_webcam.gripper_hardware import read_gripper_telemetry
 
 
@@ -116,7 +117,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--bird", required=True)
     parser.add_argument("--flir-visible", default="/dev/video20")
     parser.add_argument("--record-flir-visible", action="store_true")
-    parser.add_argument("--root", default="/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability")
+    parser.add_argument("--root", default=str(dataset_root("ir_grip_force_viability")))
     parser.add_argument("--port", default=ARM_PORT)
     parser.add_argument("--fps", type=float, default=10.0)
     parser.add_argument("--baseline-s", type=float, default=2.0)

@@ -9,6 +9,13 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from statistics import fmean
+import sys
+
+_CHECKOUT_ROOT = Path(__file__).resolve().parents[2]
+if str(_CHECKOUT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_CHECKOUT_ROOT))
+
+from ir_force.data_paths import dataset_root  # noqa: E402
 
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib-ir-foam-compression")
 
@@ -20,7 +27,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
-DEFAULT_ROOT = Path("/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_foam_compression")
+DEFAULT_ROOT = dataset_root("ir_foam_compression")
 
 
 @dataclass(frozen=True)

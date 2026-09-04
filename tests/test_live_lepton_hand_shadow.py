@@ -7,6 +7,7 @@ import json
 import sys
 
 import live_lepton_hand_shadow as runner
+from ir_force.data_paths import workspace_root
 from ir_force.ir_capture import (
     FrameSample,
     LeptonTelemetry,
@@ -314,7 +315,7 @@ def test_manual_ffc_restarts_approved_cpp_streamer_and_requires_marker():
     assert calls == [
         (
             [
-                "/home/zhuokai/hand-teleop/scripts/run_lepton_stream.sh",
+                str(workspace_root() / "scripts" / "run_lepton_stream.sh"),
                 "start",
             ],
             {

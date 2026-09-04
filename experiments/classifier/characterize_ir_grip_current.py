@@ -19,6 +19,12 @@ from lerobot_teleoperator_so101_webcam.gripper_hardware import (
 )
 
 
+_CHECKOUT_ROOT = Path(__file__).resolve().parents[2]
+if str(_CHECKOUT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_CHECKOUT_ROOT))
+
+from ir_force.data_paths import dataset_root  # noqa: E402
+
 ARM_PORT = "/dev/serial/by-id/usb-1a86_USB_Single_Serial_5B14110850-if00"
 ARM_ID = "so101_follower_1"
 
@@ -68,7 +74,7 @@ def main() -> None:
     parser.add_argument("--min-current-gap", type=float, default=10.0)
     parser.add_argument(
         "--out",
-        default="/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/grip_targets.json",
+        default=str(dataset_root("ir_grip_force_viability") / "grip_targets.json"),
     )
     args = parser.parse_args()
 

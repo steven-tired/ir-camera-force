@@ -11,10 +11,13 @@
 #   ./run_lepton_stream.sh status   # is it running? tail its log
 set -euo pipefail
 
-PI=anujn@192.168.50.2
-LAPTOP_IP=192.168.50.1
-PORT=8080
-BIN=/home/anujn/Project/LeptonModule/software/build/raspberrypi_video_network
+# Rig-specific; override per machine. BIN is where the streamer was built ON
+# THE PI, from https://github.com/AnujN9/LeptonModule (see
+# hardware/lepton/UPSTREAM.md), so it is a path in the Pi user's home.
+PI="${LEPTON_PI_SSH:-pi@192.168.50.2}"
+LAPTOP_IP="${LEPTON_LAPTOP_IP:-192.168.50.1}"
+PORT="${LEPTON_PORT:-8080}"
+BIN="${LEPTON_PI_BIN:-\$HOME/Project/LeptonModule/software/build/raspberrypi_video_network}"
 LOG=/tmp/lepton_stream.log
 STREAM_RE="^${BIN}( |$)"
 

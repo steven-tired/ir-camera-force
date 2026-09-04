@@ -14,6 +14,7 @@ from ir_force.classifier.ir_devices import (
     parse_v4l2_formats,
     VideoFormat,
 )
+from ir_force.data_paths import dataset_root
 
 
 def _v4l2_formats(path: str) -> str:
@@ -100,7 +101,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--out-dir",
-        default="/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability/setup_check",
+        default=str(dataset_root("ir_grip_force_viability") / "setup_check"),
         help="Directory for captured verification frames",
     )
     args = parser.parse_args()

@@ -10,7 +10,7 @@ Thermal intrinsics are FIXED to FLIR's published Lepton 3.1R Brown-Conrady param
 color is the D435i factory pinhole. See scratch_lepton/PLAN_refine_extrinsic.md.
 
 Run:
-  cd /home/zhuokai/hand-teleop
+  cd $WORKSPACE_ROOT
   env -u PYTHONPATH .venv-lerobot/bin/python scripts/refine_extrinsic.py \
     --build <run>/stream/build [--out <dir>] [--stage 2|3|4]
 """

@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 import pyrealsense2 as rs
 
+from ir_force.data_paths import calibration_runs_root
 from ir_force.ir_thermal_projection import (
     load_frozen_thermal_geometry,
     project_raw_depth_pixel_to_thermal,
@@ -12,10 +13,19 @@ from ir_force.ir_thermal_projection import (
 )
 
 
-FROZEN_XML = Path(
-    "/home/zhuokai/hand-teleop/thermal-project-calibration-runs/"
-    "worktrees/20260724T210232Z-attempt01/calibration/"
-    "FINAL_flir_brown/extrinsic_refined.xml"
+FROZEN_XML = (
+    calibration_runs_root()
+    / "worktrees/20260724T210232Z-attempt01/calibration/FINAL_flir_brown"
+    / "extrinsic_refined.xml"
+)
+
+#: These two tests read the frozen extrinsic produced by the calibration rig.
+#: It is not carried in this repository (see docs/CALIBRATION_PROVENANCE.md), so
+#: a clone without IR_FORCE_CALIBRATION_RUNS set skips them rather than failing
+#: on a path only the recording machine has.
+pytestmark = pytest.mark.skipif(
+    not FROZEN_XML.exists(),
+    reason=f"frozen calibration extrinsic not present at {FROZEN_XML}",
 )
 STAGE0_DATUMS = Path(__file__).resolve().parents[1] / "local/scratch_lepton/stage0b_runtime_datums.json"
 EXPECTED_COLOR_XYZ_M = (

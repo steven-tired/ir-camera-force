@@ -1,4 +1,4 @@
-# CLAUDE.md — ir-camera-force (private)
+# CLAUDE.md — ir-camera-force
 
 FLIR / Lepton / thermal work split out of the `hand-teleop` meta-workspace.
 Robot-free by design: nothing here drives an arm.
@@ -49,3 +49,21 @@ The soak must stay **robot-free**. It imports public helpers with
 stack come along. `tests/test_ir_pressure_soak.py` asserts both the allowed and
 the prohibited module sets — update them when imports change, rather than
 widening what the test tolerates.
+
+## Paths
+
+`ir_force/data_paths.py` owns every location this repo reads from. Never write
+an absolute path in a tracked file: `dataset_root("name")` for recordings,
+`CHECKOUT_ROOT` for files in this repo, `workspace_root()` /
+`calibration_runs_root()` for the rig material that lives outside it. Each
+honours an env var (`IR_FORCE_DATA_ROOT`, `IR_FORCE_WORKSPACE_ROOT`,
+`IR_FORCE_CALIBRATION_RUNS`) and otherwise resolves to what the old absolute
+paths named, so behaviour on this machine is unchanged.
+
+`tests/test_no_developer_paths_in_published_files.py` enforces it across every
+tracked file except `hardware/`, which is verbatim upstream code. A test that
+needs a file only the rig has must `skip`, not fail — a bare clone runs 1127
+of the 1160 tests and skips 33.
+
+The module is `data_paths.py`, not `paths.py`: the public repo owns a
+`paths.py`, and `tests/test_private_namespace_boundary.py` refuses the name.

@@ -13,6 +13,7 @@ from ir_force.ir_analysis import (
     summarize_trial,
     write_summary_json,
 )
+from ir_force.data_paths import dataset_root
 
 
 def _plot_area_vs_current(summaries, out_path: Path) -> None:
@@ -33,7 +34,7 @@ def _plot_area_vs_current(summaries, out_path: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", default="/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability")
+    parser.add_argument("--root", default=str(dataset_root("ir_grip_force_viability")))
     args = parser.parse_args()
     root = Path(args.root)
     summaries = [summarize_trial(path) for path in sorted((root / "trials").glob("*")) if path.is_dir()]

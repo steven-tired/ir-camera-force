@@ -8,7 +8,7 @@
 # flips it to PASS.
 #
 # USAGE — open ONE new dedicated terminal and:
-#     source /home/zhuokai/hand-teleop/scripts/calib_run.sh
+#     source calibration/realsense_lepton/tools/calib_run.sh
 # This shell becomes your capture shell for the WHOLE run. The EXIT trap is armed
 # here; if you close it before PASS, the run is sealed FAIL (intended). Retry with
 #     CALIB_ATTEMPT=attempt02 source .../calib_run.sh
@@ -27,10 +27,16 @@
 # It PRINTS the exact interactive commands (with the frozen -mintemp/-maxtemp and
 # the schedule) at each stage so you never guess.
 
+# ---- rig locations (override per machine; defaults assume the meta-workspace
+# ---- layout, i.e. this checkout sitting beside thermal-project*) ------------
+_TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CHECKOUT_ROOT="$(cd "$_TOOLS_DIR/../../.." && pwd)"
+WORKSPACE_ROOT="${IR_FORCE_WORKSPACE_ROOT:-$(cd "$CHECKOUT_ROOT/.." && pwd)}"
+
 # ---- frozen constants (from the runbook; do not edit) -----------------------
-BASE=/home/zhuokai/hand-teleop/thermal-project
-VERIFIER_WT=/home/zhuokai/hand-teleop/thermal-project-calibration
-ROOT=/home/zhuokai/hand-teleop/thermal-project-calibration-runs
+BASE="${THERMAL_PROJECT_DIR:-$WORKSPACE_ROOT/thermal-project}"
+VERIFIER_WT="${THERMAL_PROJECT_CALIBRATION_DIR:-$WORKSPACE_ROOT/thermal-project-calibration}"
+ROOT="${IR_FORCE_CALIBRATION_RUNS:-$WORKSPACE_ROOT/thermal-project-calibration-runs}"
 BASE_COMMIT=74268ab369904935c5b46fd13a14a0f34814bf4b
 VERIFIER_COMMIT=933c8bc20ab4fe7983f81ab9960ef1e205ea06ea
 PI_BINARY_SHA256=4fd0fc67e99a268210b2bf3e09a814ce78a871e316695ac8ced5d31dd0d1760a
@@ -146,15 +152,15 @@ _calib_section2() {
 _calib_section3_head() {
   local actual
   actual="$(ssh anujn@192.168.50.2 \
-    "sha256sum /home/anujn/Project/LeptonModule/software/build/raspberrypi_video_network | awk '{print \$1}'")" \
+    "sha256sum $LEPTON_PI_BIN | awk '{print \$1}'")" \
     || return $(_die "cannot ssh Pi for binary hash")
   test "$actual" = "$PI_BINARY_SHA256" || return $(_die "Pi streamer binary hash mismatch: $actual")
   printf '%s  %s\n' "$actual" \
-    /home/anujn/Project/LeptonModule/software/build/raspberrypi_video_network \
+    $LEPTON_PI_BIN \
     >"$RUN/provenance/pi-binary.sha256"
   sha256sum "$RUN/provenance"/* >"$RUN/manifests/provenance.sha256"
-  /home/zhuokai/hand-teleop/scripts/run_lepton_stream.sh start || return $(_die "streamer start failed")
-  /home/zhuokai/hand-teleop/scripts/run_lepton_stream.sh status
+  "$_TOOLS_DIR"/run_lepton_stream.sh start || return $(_die "streamer start failed")
+  "$_TOOLS_DIR"/run_lepton_stream.sh status
   echo "[§3] Pi binary verified + streamer started."
 }
 
@@ -165,7 +171,7 @@ if _calib_section1 && _calib_section2 && _calib_section3_head; then
 ============================================================================
  READY. Run these in TWO OTHER terminals, then pass the PHYSICAL gate:
    term2:  ssh anujn@192.168.50.2 '~/Project/LeptonModule/software/build/raspberrypi_video_network -ffc-only'
-   term3:  cd /home/zhuokai/hand-teleop && env -u PYTHONPATH .venv-lerobot/bin/python \\
+   term3:  cd $WORKSPACE_ROOT && env -u PYTHONPATH .venv-lerobot/bin/python \\
              webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam/view_ir_camera.py --lepton-udp 8080
 
  PROCEED ONLY WHEN: same board simultaneously sharp in D435i RGB AND Lepton LWIR,
@@ -307,5 +313,5 @@ calib_heldout() {
   seal_run_pass
   trap - EXIT
   echo "[§8] PASS SEALED. terminal-status.txt=PASS. results in $RUN/results/"
-  echo "     Stop the streamer when done: /home/zhuokai/hand-teleop/scripts/run_lepton_stream.sh stop"
+  echo "     Stop the streamer when done: "$_TOOLS_DIR"/run_lepton_stream.sh stop"
 }

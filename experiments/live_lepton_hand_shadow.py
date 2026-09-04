@@ -33,6 +33,7 @@ from live_lepton_projector_shadow import (
     _projection_fields,
     _source_fields,
 )
+from ir_force.data_paths import workspace_root
 from ir_force.realsense_camera import RealSenseRawProjectorCamera
 from webcam_input.webcam_source import WebcamSource
 from ir_force.pinch_geometry import compute_pinch_geometry
@@ -60,7 +61,7 @@ PINCH_SIGNAL_GROUPS = 6
 PINCH_SIGNAL_TARGET_VALID_SAMPLES = 5
 PINCH_SIGNAL_PHASE_TIMEOUT_S = 10.0
 MANUAL_FFC_COMMAND = [
-    "/home/zhuokai/hand-teleop/scripts/run_lepton_stream.sh",
+    str(workspace_root() / "scripts" / "run_lepton_stream.sh"),
     "start",
 ]
 

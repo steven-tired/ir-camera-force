@@ -12,9 +12,15 @@ from typing import Iterable
 import cv2
 import numpy as np
 
+from ir_force.data_paths import workspace_root
 
-WORKSPACE = Path("/home/zhuokai/hand-teleop")
-DEFAULT_TRIAL = WORKSPACE / "datasets/ir_foam_compression/trials/foam-compression_foam-20260715retry2_foam_zhuokai_rep08"
+
+WORKSPACE = workspace_root()
+DEFAULT_TRIAL = (
+    WORKSPACE
+    / "datasets/ir_foam_compression/trials"
+    / "foam-compression_foam-20260715retry2_foam_zhuokai_rep08"
+)
 DEFAULT_OUTPUT = WORKSPACE / "exports/gpt_pro_ir_foam_rep08_review_20260715"
 
 

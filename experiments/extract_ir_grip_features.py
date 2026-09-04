@@ -14,6 +14,7 @@ from ir_force.ir_features import (
     overlay_mask,
     write_features_csv,
 )
+from ir_force.data_paths import dataset_root
 
 
 def _read_frames(paths: list[Path]) -> list:
@@ -148,7 +149,7 @@ def extract_trials(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", default="/home/zhuokai/hand-teleop/ir-camera-force/local/datasets/ir_grip_force_viability")
+    parser.add_argument("--root", default=str(dataset_root("ir_grip_force_viability")))
     parser.add_argument("--baseline-frames", type=int, default=20)
     parser.add_argument("--noise-sigma", type=float, default=3.0)
     parser.add_argument(

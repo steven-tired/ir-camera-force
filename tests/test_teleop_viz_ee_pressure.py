@@ -11,6 +11,7 @@ import pytest
 sys.modules.setdefault("mediapipe", SimpleNamespace(solutions=SimpleNamespace()))
 
 from experiments import teleop_viz_ee
+from ir_force.data_paths import CHECKOUT_ROOT
 from ir_force.ir_hand_calibration import (
     ProjectionCalibration,
     save_projection_calibration,
@@ -809,10 +810,21 @@ def test_pv_apply_rejects_partial_closure_limits(tmp_path: Path):
         ])
 
 
+def _repo_script(name: str) -> Path:
+    """A carton launcher, read from this repository's own `scripts/`.
+
+    Until 2026-09-04 these two assertions read the copies still sitting in the
+    meta-workspace's `scripts/`, which the split left behind: those are the
+    pre-split launchers, pointing into the retired `webcam-input/` tree. The
+    test passed while checking a file no longer used by anything.
+    """
+    return CHECKOUT_ROOT / "scripts" / name
+
+
 def test_carton_launcher_keeps_motor_telemetry_observational():
-    script = Path(
-        "/home/zhuokai/hand-teleop/scripts/run_pv_carton_soft_direct_apply.sh"
-    ).read_text(encoding="utf-8")
+    script = _repo_script("run_pv_carton_soft_direct_apply.sh").read_text(
+        encoding="utf-8"
+    )
 
     assert "--pv-max-load" not in script
     assert "--pv-max-current" not in script
@@ -822,9 +834,9 @@ def test_carton_launcher_keeps_motor_telemetry_observational():
     assert '--pv-mapping "${MAPPING}"' in script
     assert "pv_carton_soft_precise_apply" in script
 
-    span = Path(
-        "/home/zhuokai/hand-teleop/scripts/run_pv_carton_span_apply.sh"
-    ).read_text(encoding="utf-8")
+    span = _repo_script("run_pv_carton_span_apply.sh").read_text(
+        encoding="utf-8"
+    )
     assert "PV_MAPPING=carton_span" in span
     assert "--wrist-roll-range-deg 0" in span
 
