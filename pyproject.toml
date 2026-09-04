@@ -5,7 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ir-camera-force"
 version = "0.1.0"
-description = "Private FLIR and Lepton force-sensing research tools"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+description = "FLIR and Lepton force-sensing research tools"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "numpy",
