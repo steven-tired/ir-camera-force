@@ -33,6 +33,12 @@ _TOOLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CHECKOUT_ROOT="$(cd "$_TOOLS_DIR/../../.." && pwd)"
 WORKSPACE_ROOT="${IR_FORCE_WORKSPACE_ROOT:-$(cd "$CHECKOUT_ROOT/.." && pwd)}"
 
+# The Pi that streams the Lepton. Same names and defaults as
+# run_lepton_stream.sh, which this script drives; BIN is a path on the Pi, so
+# $HOME is left for the remote shell to expand.
+PI="${LEPTON_PI_SSH:-pi@192.168.50.2}"
+LEPTON_PI_BIN="${LEPTON_PI_BIN:-\$HOME/Project/LeptonModule/software/build/raspberrypi_video_network}"
+
 # ---- frozen constants (from the runbook; do not edit) -----------------------
 BASE="${THERMAL_PROJECT_DIR:-$WORKSPACE_ROOT/thermal-project}"
 VERIFIER_WT="${THERMAL_PROJECT_CALIBRATION_DIR:-$WORKSPACE_ROOT/thermal-project-calibration}"
@@ -151,12 +157,11 @@ _calib_section2() {
 # =============================================================================
 _calib_section3_head() {
   local actual
-  actual="$(ssh anujn@192.168.50.2 \
+  actual="$(ssh "$PI" \
     "sha256sum $LEPTON_PI_BIN | awk '{print \$1}'")" \
     || return $(_die "cannot ssh Pi for binary hash")
   test "$actual" = "$PI_BINARY_SHA256" || return $(_die "Pi streamer binary hash mismatch: $actual")
-  printf '%s  %s\n' "$actual" \
-    $LEPTON_PI_BIN \
+  printf '%s  %s\n' "$actual" "$LEPTON_PI_BIN" \
     >"$RUN/provenance/pi-binary.sha256"
   sha256sum "$RUN/provenance"/* >"$RUN/manifests/provenance.sha256"
   "$_TOOLS_DIR"/run_lepton_stream.sh start || return $(_die "streamer start failed")
@@ -170,9 +175,9 @@ if _calib_section1 && _calib_section2 && _calib_section3_head; then
 
 ============================================================================
  READY. Run these in TWO OTHER terminals, then pass the PHYSICAL gate:
-   term2:  ssh anujn@192.168.50.2 '~/Project/LeptonModule/software/build/raspberrypi_video_network -ffc-only'
+   term2:  ssh $PI "$LEPTON_PI_BIN -ffc-only"
    term3:  cd $WORKSPACE_ROOT && env -u PYTHONPATH .venv-lerobot/bin/python \\
-             webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam/view_ir_camera.py --lepton-udp 8080
+             $CHECKOUT_ROOT/experiments/view_ir_camera.py --lepton-udp 8080
 
  PROCEED ONLY WHEN: same board simultaneously sharp in D435i RGB AND Lepton LWIR,
  all 4x3 inner corners reliably detected, thermal NOT saturated, and the viewer
@@ -313,5 +318,5 @@ calib_heldout() {
   seal_run_pass
   trap - EXIT
   echo "[§8] PASS SEALED. terminal-status.txt=PASS. results in $RUN/results/"
-  echo "     Stop the streamer when done: "$_TOOLS_DIR"/run_lepton_stream.sh stop"
+  echo "     Stop the streamer when done: $_TOOLS_DIR/run_lepton_stream.sh stop"
 }
