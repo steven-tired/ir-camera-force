@@ -13,8 +13,8 @@ import numpy as np
 import pytest
 
 
-MODULE_PATH = Path(__file__).resolve().parents[1] / "ir_pressure_soak.py"
-PROJECT_ROOT = MODULE_PATH.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+MODULE_PATH = PROJECT_ROOT / "experiments/ir_pressure_soak.py"
 ROBOT_FREE_ENV = "LEROBOT_TELEOPERATOR_SO101_WEBCAM_ROBOT_FREE_IMPORT"
 #: What a robot-free soak import is allowed to pull in. Before the split these
 #: modules lived under the `lerobot_teleoperator_so101_webcam` package, so a
@@ -45,7 +45,7 @@ ROBOT_FREE_MODULES = [
 
 
 def _load_module():
-    assert MODULE_PATH.exists(), "ir_pressure_soak.py has not been implemented"
+    assert MODULE_PATH.exists(), "experiments/ir_pressure_soak.py has not been implemented"
     spec = importlib.util.spec_from_file_location("ir_pressure_soak", MODULE_PATH)
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
@@ -278,7 +278,7 @@ def _find_prohibited_import_behaviors(source, *, filename="<source>"):
 
 
 def test_ast_and_imports_prohibit_robot_or_live_teleop_references():
-    assert MODULE_PATH.exists(), "ir_pressure_soak.py has not been implemented"
+    assert MODULE_PATH.exists(), "experiments/ir_pressure_soak.py has not been implemented"
     source = MODULE_PATH.read_text(encoding="utf-8")
 
     assert _find_prohibited_import_behaviors(source, filename=str(MODULE_PATH)) == []
@@ -515,9 +515,10 @@ def _fresh_python(code):
     environment = os.environ.copy()
     environment.pop("PYTHONPATH", None)
     environment.pop(ROBOT_FREE_ENV, None)
-    public = _public_package_paths()
-    if public:
-        environment["PYTHONPATH"] = os.pathsep.join(public)
+    # `ir_pressure_soak` lives in experiments/ with the other programs, so cwd
+    # alone no longer finds it — the same directory pytest puts on the path.
+    search = [str(PROJECT_ROOT / "experiments"), *_public_package_paths()]
+    environment["PYTHONPATH"] = os.pathsep.join(search)
     return subprocess.run(
         [sys.executable, "-c", code],
         cwd=PROJECT_ROOT,

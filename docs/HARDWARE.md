@@ -70,7 +70,7 @@ Saved to `~/.cache/huggingface/lerobot/calibration/robots/so_follower/so101_foll
 ## IR grip-force viability experiment
 
 - Experiment plan: `docs/superpowers/plans/2026-07-06-ir-grip-force-viability-experiment.md`
-- Operator runbook: `IR_GRIP_FORCE_EXPERIMENT.md`
+- Operator runbook: `../docs/experiments/IR_GRIP_FORCE_EXPERIMENT.md`
 - Dataset root: `local/datasets/ir_grip_force_viability`
 - Historical device enumeration above listed the workspace camera as
   `/dev/video2`, but do not use `/dev/video2` for this experiment.

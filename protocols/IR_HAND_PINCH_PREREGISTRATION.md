@@ -225,6 +225,6 @@ cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot
 env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python \
   validate_ir_hand_pinch_session_ledger.py \
   --ledger SESSION_LEDGER.json \
-  --schema ir_hand_pinch_session_ledger.schema.json \
-  --schedule ir_hand_pinch_trial_schedule.json
+  --schema ../protocols/ir_hand_pinch_session_ledger.schema.json \
+  --schedule ../protocols/ir_hand_pinch_trial_schedule.json
 ```

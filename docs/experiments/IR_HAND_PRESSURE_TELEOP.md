@@ -11,7 +11,7 @@ hardware soak and manual fault injections below pass.
 ## Calibration Fit
 
 The Gate 1 runtime expects the persistent patched FLIR bridge documented in
-`IR_GRIP_FORCE_EXPERIMENT.md`. Load both loopback devices and start that bridge
+`../../docs/experiments/IR_GRIP_FORCE_EXPERIMENT.md`. Load both loopback devices and start that bridge
 before calibration or a soak:
 
 ```bash
@@ -67,7 +67,7 @@ maximum error within the runtime ROI margin or an adaptive margin with at least
 
 ## Gate 1 Status
 
-`ir_pressure_soak.py` is the standalone robot-free Gate 1 executable. It opens
+`../../experiments/ir_pressure_soak.py` is the standalone robot-free Gate 1 executable. It opens
 only OAK and FLIR sources plus the required CSV sidecar. It does not enumerate,
 construct, connect, read, torque, or command a robot, and every CSV row has
 `command_sent=false`.
@@ -81,7 +81,7 @@ Run this short robot-free smoke test first:
 
 ```bash
 cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python ir_pressure_soak.py \
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python ../../experiments/ir_pressure_soak.py \
   --duration-s 10 \
   --max-oak-stall-ms 500 \
   --min-cycles 0 \
@@ -95,7 +95,7 @@ complete open/close/open cycles:
 
 ```bash
 cd $WORKSPACE_ROOT/webcam-input/.worktrees/ir-hand-pressure-so101-teleop/lerobot_teleoperator_so101_webcam
-env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python ir_pressure_soak.py \
+env -u PYTHONPATH $WORKSPACE_ROOT/.venv-lerobot/bin/python ../../experiments/ir_pressure_soak.py \
   --duration-s 1800 \
   --max-oak-stall-ms 500 \
   --min-cycles 100 \

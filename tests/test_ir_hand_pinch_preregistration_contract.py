@@ -15,11 +15,11 @@ from validate_ir_hand_pinch_session_ledger import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-STUDY_SCHEMA_PATH = ROOT / "ir_hand_pinch_study_contract.schema.json"
-LEDGER_SCHEMA_PATH = ROOT / "ir_hand_pinch_session_ledger.schema.json"
-SCHEDULE_PATH = ROOT / "ir_hand_pinch_trial_schedule.json"
-PREREG_PATH = ROOT / "IR_HAND_PINCH_PREREGISTRATION.md"
-CALIBRATION_RUNBOOK_PATH = ROOT / "REALSENSE_LEPTON_CALIBRATION.md"
+STUDY_SCHEMA_PATH = ROOT / "protocols/ir_hand_pinch_study_contract.schema.json"
+LEDGER_SCHEMA_PATH = ROOT / "protocols/ir_hand_pinch_session_ledger.schema.json"
+SCHEDULE_PATH = ROOT / "protocols/ir_hand_pinch_trial_schedule.json"
+PREREG_PATH = ROOT / "protocols/IR_HAND_PINCH_PREREGISTRATION.md"
+CALIBRATION_RUNBOOK_PATH = ROOT / "docs/REALSENSE_LEPTON_CALIBRATION.md"
 FIXTURES = ROOT / "tests" / "fixtures"
 
 

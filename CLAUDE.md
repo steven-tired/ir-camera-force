@@ -26,7 +26,7 @@ fails if any of them comes back.
   exist in both with different content; see `docs/SOURCE_MAP.md` before touching.
 - `experiments/`, `experiments/classifier/` — programs, imported by bare name
   (pyproject puts both on `pythonpath`).
-- `ir_pressure_soak.py` — at the repo root, because its test resolves it there.
+- `experiments/ir_pressure_soak.py` — at the repo root, because its test resolves it there.
 - `hardware/` — FLIR and Lepton source, each with `UPSTREAM.md`. Preserved, not
   actively developed; the Lepton has been dead since 2026-07-17.
 - `calibration/` — thermal calibration code and artifacts.
@@ -62,8 +62,21 @@ paths named, so behaviour on this machine is unchanged.
 
 `tests/test_no_developer_paths_in_published_files.py` enforces it across every
 tracked file except `hardware/`, which is verbatim upstream code. A test that
-needs a file only the rig has must `skip`, not fail — a bare clone runs 1129
-of the 1162 tests and skips 33.
+needs a file only the rig has must `skip`, not fail — a bare clone runs 1132
+of the 1165 tests and skips 33.
 
 The module is `data_paths.py`, not `paths.py`: the public repo owns a
 `paths.py`, and `tests/test_private_namespace_boundary.py` refuses the name.
+
+## Where files go
+
+The root holds six files and nothing else: `README.md`, `LICENSE`,
+`THIRD_PARTY_NOTICES.md`, `CLAUDE.md`, `pyproject.toml`, `conftest.py`. It used
+to hold eleven markdown documents, three JSON contracts and a program, which
+made it impossible to see what the repository actually was. New material goes
+in `docs/` (writeups in `docs/experiments/`), `protocols/` (the preregistration
+and its schemas), or `experiments/` (programs) — not at the root.
+
+`calibration/thermal_project/` is additions and patches, never a checkout. The
+upstream it overlays states no license; see its README before adding anything
+there.

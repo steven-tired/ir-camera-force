@@ -66,7 +66,7 @@ called force sensing.
 
 **Primary artifacts:**
 
-- `IR_GRIP_FORCE_EXPERIMENT.md`
+- `../../docs/experiments/IR_GRIP_FORCE_EXPERIMENT.md`
 - `datasets/ir_grip_force_viability/organized_results/final_hard_sweep_goal30_to25/`
 - `datasets/ir_grip_force_viability/soft_sweep_ir_load_summary.csv`
 
@@ -191,8 +191,8 @@ piece, or camera state. Its FLIR source was still colorized RGB.
 
 **Primary artifacts:**
 
-- `FOAM_COMPRESSION_EXPERIMENT.md`
-- `IR_FOAM_CLASSIFIER_LOCAL_ARCHITECTURE.md`
+- `../../docs/experiments/FOAM_COMPRESSION_EXPERIMENT.md`
+- `../../docs/experiments/IR_FOAM_CLASSIFIER_LOCAL_ARCHITECTURE.md`
 - `datasets/ir_foam_compression/trials/foam-compression_foam-20260715retry2_foam_zhuokai_rep08/`
 - `exports/ir_archive/foam_rep08_20260715/gpt_pro_ir_foam_rep08_review_20260715/`
 

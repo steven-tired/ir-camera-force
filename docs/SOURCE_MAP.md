@@ -47,7 +47,7 @@ decision has not been made and is not made by this migration.
 | `README.md` | — | new |
 | `pyproject.toml`, `.gitignore` | — | new |
 | `docs/PUBLIC_INTERFACE_LOCK.md` | — | new (pins the public commit) |
-| `docs/CLAIMS_AND_GATES.md` | `wt` IR_GRIP_FORCE_EXPERIMENT.md, IR_HAND_PINCH_PREREGISTRATION.md, HARDWARE.md | rewritten |
+| `docs/CLAIMS_AND_GATES.md` | `wt` ../docs/experiments/IR_GRIP_FORCE_EXPERIMENT.md, ../protocols/IR_HAND_PINCH_PREREGISTRATION.md, ../docs/HARDWARE.md | rewritten |
 
 _Module-level rows are appended as each group migrates._
 

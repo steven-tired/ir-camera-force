@@ -954,7 +954,7 @@ matters. Watch for keyboard/false-positive SB detections and drop them.
   `/tmp/webai-ir-final-code-review-round6/reply.md` (run ID
   `209449841c80a2b8a224ae58c18a34be`).
 - **Phase 4/5 preregistration artifacts are committed.** The webcam worktree now contains
-  `IR_HAND_PINCH_PREREGISTRATION.md`, Draft 2020-12 immutable study-contract and session-ledger
+  `../../protocols/IR_HAND_PINCH_PREREGISTRATION.md`, Draft 2020-12 immutable study-contract and session-ledger
   schemas, positive/negative fixtures, six authoritative realized schedules, and a seal-time
   semantic validator that recomputes the schedule hash and enforces schedule/attempt/FFC and
   valid-modality artifact invariants. The current branch commit is
@@ -1297,7 +1297,7 @@ Produce `calibration/lepton_hard_pinch_model.json` (threshold or logistic), wire
 `full_scale_delta`. Replay Phase 2 dataset through `HandPressureEstimator`, agreement ≥95 %.
 
 ### Step D — Phase 4 shadow + soak (wiring already done for teleop/record; soak NOT done)
-`ir_pressure_soak.py --lepton-udp` is **not implemented** (heavy, calibration-baked — deferred).
+`../../experiments/ir_pressure_soak.py --lepton-udp` is **not implemented** (heavy, calibration-baked — deferred).
 Run live shadow: `--ir-pressure-shadow --ir-lepton-port 8080 --ir-sidecar <csv>`; review that
 hard-pinch events fire only on real hard pinches. Then Phase 5: flip `--ir-pressure` /
 `SO101_IR_PRESSURE=1`, stationary-arm soft-object test first, then A/B pick-place.

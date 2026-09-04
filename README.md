@@ -29,13 +29,19 @@ ir_force/              the library: everything importable
 ir_force/classifier/     the second, parallel line (see "Two parallel lines")
 experiments/           the programs: capture, record, analyze, report
 experiments/classifier/  same, for the classifier line
-calibration/           camera-pair calibration: data, tooling, the C++ rig
+calibration/           camera-pair calibration: data, tooling, additions
 hardware/              third-party camera bridges and firmware
-tests/                 1162 of them; no camera, no robot
-docs/                  provenance, and what is actually claimed
+protocols/             the preregistration and its machine-checked schemas
+docs/                  writeups, runbooks, provenance, what is claimed
+docs/experiments/        the five experiment writeups
+tests/                 1165 of them; no camera, no robot
 scripts/               the two live-rig launchers
 local/                 git-ignored: datasets, evidence, exports, runs
 ```
+
+The repository root holds only `README.md`, `LICENSE`,
+`THIRD_PARTY_NOTICES.md`, `CLAUDE.md`, `pyproject.toml` and `conftest.py`.
+Everything else lives in one of the directories above.
 
 ### `ir_force/` — the library
 
@@ -87,10 +93,15 @@ Named by verb, and the verb is the whole taxonomy:
   capture and refinement programs (`preview_capture.py`, `refine_extrinsic.py`)
   and the operator boilerplate that reproduces the runbook
   (`calib_run.sh`); `LEPTON_HANDOFF.md` and `LEPTON_PI_HOWTO.md` are the
-  handover notes. The runbook itself is `REALSENSE_LEPTON_CALIBRATION.md` at
-  the root.
-- **`thermal_project/`** — the C++ calibration and thermal-point-cloud rig,
-  third-party. **Its license is unresolved — see `THIRD_PARTY_NOTICES.md`.**
+  handover notes. The runbook itself is `docs/REALSENSE_LEPTON_CALIBRATION.md`.
+- **`thermal_project/`** — **not** a copy of the C++ calibration rig this line
+  was built on. That rig is Anuj Natraj's
+  [ThermalProject](https://github.com/AnujN9/ThermalProject), which states no
+  license, so it is not redistributed here. What is kept is this project's own
+  ~2600 lines of additions (`HeldOutVerifier`, `CalibrationContracts`,
+  `resolve_extrinsic`, `ThermalFrameAssembler` and their tests) plus the
+  patches, and a recipe that reconstructs the exact commit those calibration
+  runs used. See `calibration/thermal_project/README.md`.
 
 ### `hardware/` — third-party, carried verbatim
 
@@ -104,19 +115,25 @@ produces unusable frames on Linux.
 
 - **`CLAIMS_AND_GATES.md`** — read this first. Separates measured from
   assumed, and names the gates still open.
+- **`experiments/`** — the five writeups, one per line of work:
+  `IR_GRIP_FORCE_EXPERIMENT.md`, `FOAM_COMPRESSION_EXPERIMENT.md`,
+  `IR_HAND_PRESSURE_TELEOP.md`, `IR_FOAM_CLASSIFIER_LOCAL_ARCHITECTURE.md`,
+  `IR_ASSISTED_TELEOP_PROGRESS.md`.
+- **`HARDWARE.md`** — the rig inventory, enumerated 2026-06-17.
+- **`REALSENSE_LEPTON_CALIBRATION.md`** — the calibration runbook that
+  `calibration/realsense_lepton/tools/calib_run.sh` reproduces.
 - **`SOURCE_MAP.md`**, **`CALIBRATION_PROVENANCE.md`**, **`MIGRATION_AUDIT.md`**
   — where every migrated file came from, at which commit.
 - **`PUBLIC_INTERFACE_LOCK.md`** — the pinned `mediapipe-so101` commit.
 
-### Root files
+### `protocols/` — the preregistration
 
-The experiment writeups (`IR_GRIP_FORCE_EXPERIMENT.md`,
-`FOAM_COMPRESSION_EXPERIMENT.md`, `IR_HAND_PRESSURE_TELEOP.md`,
-`IR_ASSISTED_TELEOP_PROGRESS.md`, …), the rig inventory (`HARDWARE.md`), the
-preregistration (`IR_HAND_PINCH_PREREGISTRATION.md`) with its machine-checked
-`*.schema.json` contracts and `ir_hand_pinch_trial_schedule.json`, and
-`ir_pressure_soak.py`, the robot-free soak that exercises the shadow path
-without hardware.
+`IR_HAND_PINCH_PREREGISTRATION.md` and the three JSON files that make it
+machine-checkable: two `*.schema.json` contracts and the frozen
+`ir_hand_pinch_trial_schedule.json`.
+`tests/test_ir_hand_pinch_preregistration_contract.py` holds the document and
+the schemas to each other, so the preregistration cannot drift from what the
+recording programs actually enforce.
 
 ## Running it
 

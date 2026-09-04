@@ -42,7 +42,7 @@ $WORKSPACE_ROOT/
 │       ├── rep08_gpt_pro_review_bundle.zip
 │       └── materials/
 └── webcam-input/lerobot_teleoperator_so101_webcam/
-    ├── FOAM_COMPRESSION_EXPERIMENT.md
+    ├── ../../docs/experiments/FOAM_COMPRESSION_EXPERIMENT.md
     ├── IR_FOAM_CLASSIFIER_LOCAL_ARCHITECTURE.md
     ├── view_ir_foam_setup.py               # Interactive dual-camera ROI preview
     ├── record_ir_foam_compression_experiment.py

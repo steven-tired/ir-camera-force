@@ -2,7 +2,7 @@
 # RealSense D435i <-> Lepton calibration run driver.
 #
 # THIS IS OPERATOR BOILERPLATE ONLY. It reproduces the non-interactive parts of
-# REALSENSE_LEPTON_CALIBRATION.md (runbook Sections 1,2,3-hash,4-tail,5-tail,6,7,8)
+# ../../../docs/REALSENSE_LEPTON_CALIBRATION.md (runbook Sections 1,2,3-hash,4-tail,5-tail,6,7,8)
 # VERBATIM so you do not hand-type them. It changes NO calibration algorithm and
 # weakens NO gate: terminal-status starts FAIL and only seal_run_pass (end of §8)
 # flips it to PASS.
