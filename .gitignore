@@ -1,4 +1,11 @@
 /local/
+
+# Per-developer agent instructions. The conventions that outlive one
+# person's setup are in README.md; this file is whatever else you keep locally.
+/CLAUDE.md
+/AGENTS.md
+/.claude/
+
 /.worktrees/
 /.venv/
 .venv-*/

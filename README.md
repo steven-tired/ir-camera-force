@@ -40,8 +40,8 @@ local/                 git-ignored: datasets, evidence, exports, runs
 ```
 
 The repository root holds only `README.md`, `LICENSE`,
-`THIRD_PARTY_NOTICES.md`, `CLAUDE.md`, `pyproject.toml` and `conftest.py`.
-Everything else lives in one of the directories above.
+`THIRD_PARTY_NOTICES.md`, `pyproject.toml` and `conftest.py`. Everything else
+lives in one of the directories above.
 
 ### `ir_force/` — the library
 
@@ -137,13 +137,28 @@ recording programs actually enforce.
 
 ## Running it
 
+### Install
+
+Python 3.12. The one hard dependency is a checkout of
+[mediapipe-so101](https://github.com/steven-tired/mediapipe-so101) beside this
+one — the gripper contract is imported from there, never vendored.
+
 ```bash
-python -m pytest -q          # 1162 tests, no camera or robot required
+git clone https://github.com/steven-tired/ir-camera-force.git
+git clone https://github.com/steven-tired/mediapipe-so101.git   # sibling
+cd ir-camera-force
+pip install -e .            # numpy, scipy, opencv-python
+python -m pytest -q         # 1165 tests, no camera or robot required
 ```
 
-Recordings default to `local/datasets/` inside this checkout, and the live-rig
-programs look for their sibling repositories one directory up. Both are
-resolved in `ir_force/data_paths.py` and can be pointed elsewhere:
+`conftest.py` puts the sibling checkout on the path. If it lives somewhere
+else, `export MEDIAPIPE_SO101_DIR=/path/to/mediapipe-so101`.
+
+### Where things are written
+
+Recordings go to `local/datasets/` inside this checkout, and the live-rig
+programs look for their sibling repositories one directory up. Everything is
+resolved in `ir_force/data_paths.py`; nothing is hardcoded:
 
 ```bash
 export IR_FORCE_DATA_ROOT=/mnt/big/ir-datasets       # where datasets live
@@ -152,8 +167,82 @@ export IR_FORCE_CALIBRATION_RUNS=/mnt/big/calib-runs # dated calibration runs
 ```
 
 The datasets, the calibration runs and the FLIR/Lepton hardware itself are not
-in this repository. Tests that need them skip; everything else runs on a bare
-clone.
+in this repository. Tests that need them skip; a bare clone runs 1132 of 1165.
+
+### Without any hardware
+
+The soak exercises the whole pressure-shadow path against a recorded
+calibration, so it is the fastest way to see the pipeline do something:
+
+```bash
+python experiments/ir_pressure_soak.py \
+    --sidecar /tmp/shadow.csv \
+    --calibration <a calibration json> \
+    --duration-s 30
+```
+
+It is robot-free on purpose and stays that way: it imports the public helpers
+with `LEROBOT_TELEOPERATOR_SO101_WEBCAM_ROBOT_FREE_IMPORT=1` so the plugin
+classes — and with them `lerobot.motors` and a serial stack — never load.
+`tests/test_ir_pressure_soak.py` asserts both the allowed and the prohibited
+module sets.
+
+With a dataset in hand, the `analyze_*` programs are the other half that needs
+no camera:
+
+```bash
+python experiments/analyze_ir_grip_experiment.py --root <dataset>
+python experiments/analyze_ir_hand_pressure.py --root <dataset> --out-prefix run01
+```
+
+Every program takes `--help`, and `--root` defaults to the right place under
+`IR_FORCE_DATA_ROOT`, so it can usually be left off.
+
+### With a camera
+
+```bash
+python experiments/view_ir_camera.py                     # is the thermal device alive?
+python experiments/verify_ir_grip_setup.py --bird /dev/video2   # preflight, writes frames
+python experiments/record_ir_grip_trial.py --bird /dev/video2 \
+    --object carton --hardness medium --grip-level 1,2,3 --rep 1
+```
+
+`--bird` is the overhead camera and is required — there is no sensible default
+for which `/dev/video*` it landed on. `--thermal` defaults to `/dev/video21`
+and `--flir-visible` to `/dev/video20`, which is where the V4L2 bridge puts
+them.
+
+`verify_*` before `record_*` is not optional advice — it is what catches a dead
+thermal device before a session's worth of trials records zeros. The FLIR ONE
+needs the V4L2 bridge from `hardware/flirone-v4l2/` running first; that tree's
+README covers building it.
+
+### With the arm
+
+```bash
+./scripts/run_pv_carton_soft_direct_apply.sh    # PressureVision drives the grip
+./scripts/run_pv_carton_span_apply.sh           # the 250 g carton mapping
+```
+
+**These move the arm. Keep the e-stop within reach.** They resolve their own
+paths through `scripts/_common.sh` and refuse to start until every evidence
+stream is recording — a run whose evidence never started is not evidence.
+
+## Conventions
+
+Three rules, each with a test that enforces it:
+
+1. **The dependency runs one way**: `ir-camera-force → mediapipe-so101 →
+   LeRobot`. The public repo must never import `ir_force`, and a module that is
+   not actually about IR/thermal sensing belongs there rather than here — four
+   have already moved out for that reason.
+   (`test_gripper_adapter.py`, `test_private_namespace_boundary.py`)
+2. **No absolute paths in tracked files.** Use `dataset_root("name")`,
+   `CHECKOUT_ROOT`, `workspace_root()` or `calibration_runs_root()` from
+   `ir_force/data_paths.py`. A test that needs a file only the rig has must
+   `skip`, not fail. (`test_no_developer_paths_in_published_files.py`)
+3. **Nothing new at the root.** Writeups go in `docs/experiments/`, study
+   contracts in `protocols/`, programs in `experiments/`.
 
 ## License
 

@@ -16,10 +16,18 @@ gone, and so is the tree. The mechanism stayed because the first reason above
 is the real one.
 """
 
+import os
 from pathlib import Path
 import sys
 
-PUBLIC_REPO = Path(__file__).resolve().parent.parent / "mediapipe-so101"
+#: The sibling checkout, overridable the same way `scripts/_common.sh` accepts
+#: it, so a clone that does not lay the two repos out side by side still runs.
+_OVERRIDE = os.environ.get("MEDIAPIPE_SO101_DIR")
+PUBLIC_REPO = (
+    Path(_OVERRIDE).expanduser()
+    if _OVERRIDE
+    else Path(__file__).resolve().parent.parent / "mediapipe-so101"
+)
 
 for src in (
     PUBLIC_REPO / "packages" / "webcam_input" / "src",
